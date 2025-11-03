@@ -1,14 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hotel-booking-system
+  name: hotel-booking-system-green
   namespace: hotel-booking
   labels:
     app: hotel-booking-system
+    version: green
 spec:
   selector:
     app: hotel-booking-system
+    version: green
   ports:
-    - port: 80
+    - port: 8080
       targetPort: 8080
-  type: LoadBalancer
+  type: ClusterIP

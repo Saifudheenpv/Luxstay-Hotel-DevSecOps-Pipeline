@@ -4,14 +4,31 @@ metadata:
   name: hotel-booking-ingress
   namespace: hotel-booking
   annotations:
+    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
-    alb.ingress.kubernetes.io/success-codes: "200"
-    alb.ingress.kubernetes.io/load-balancer-attributes: routing.http2.enabled=true
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/actions.blue-green: |
+      {
+        "type":"forward",
+        "forwardConfig":{
+          "targetGroups":[
+            {
+              "serviceName":"hotel-booking-system-blue",
+              "servicePort":8080,
+              "weight":100
+            },
+            {
+              "serviceName":"hotel-booking-system-green", 
+              "servicePort":8080,
+              "weight":0
+            }
+          ]
+        }
+      }
 spec:
-  ingressClassName: alb
   rules:
     - http:
         paths:
@@ -19,6 +36,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: hotel-booking-system
+                name: blue-green
                 port:
-                  number: 8080
+                  name: use-annotation

@@ -8,6 +8,7 @@ metadata:
 spec:
   selector:
     app: hotel-booking-system
+    version: blue
   ports:
     - port: 80
       targetPort: 8080

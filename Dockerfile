@@ -16,19 +16,22 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Install curl for health checks and wget for alternative health checks
+RUN apk update && apk add --no-cache curl wget
+
 # Create non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring
 
 # Copy jar from build stage
-COPY --from=build /app/target/hotel-booking-system-1.0.0.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 # Health check for Kubernetes
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Expose port
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application with optimized JVM settings
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "-Djava.security.egd=file:/dev/./urandom", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "app.jar"]

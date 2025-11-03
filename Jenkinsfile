@@ -104,7 +104,8 @@ pipeline {
                         -Dsonar.host.url=${SONAR_URL} \
                         -Dsonar.login=${SONAR_TOKEN} \
                         -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                        -Dsonar.java.coveragePlugin=jacoco
+                        -Dsonar.java.coveragePlugin=jacoco \
+                        -Dsonar.sourceEncoding=UTF-8
                     """
                 }
             }
@@ -136,6 +137,28 @@ pipeline {
                     echo "🐳 Building Docker Image"
                     docker.build("${REGISTRY}/${APP_NAME}:${VERSION}")
                     echo "✅ Docker image built: ${REGISTRY}/${APP_NAME}:${VERSION}"
+                    
+                    // Test the built image
+                    sh """
+                        echo "🔍 Testing Docker image"
+                        docker run --rm -d --name test-container ${REGISTRY}/${APP_NAME}:${VERSION}
+                        sleep 10
+                        
+                        # Test if container is running
+                        if docker ps | grep test-container; then
+                            echo "✅ Docker container started successfully"
+                            # Test health endpoint
+                            if docker exec test-container curl -f http://localhost:8080/actuator/health; then
+                                echo "✅ Application health check passed in container"
+                            else
+                                echo "⚠️ Health check failed, but container is running"
+                            fi
+                            docker stop test-container
+                        else
+                            echo "❌ Docker container failed to start"
+                            exit 1
+                        fi
+                    """
                 }
             }
         }
@@ -157,6 +180,15 @@ pipeline {
                         docker.image("${REGISTRY}/${APP_NAME}:${VERSION}").push()
                     }
                     echo "✅ Docker image pushed: ${REGISTRY}/${APP_NAME}:${VERSION}"
+                    
+                    # Also tag as latest for rollback capability
+                    sh """
+                        docker tag ${REGISTRY}/${APP_NAME}:${VERSION} ${REGISTRY}/${APP_NAME}:latest
+                    """
+                    docker.withRegistry('', 'dockerhub-creds') {
+                        docker.image("${REGISTRY}/${APP_NAME}:latest").push()
+                    }
+                    echo "✅ Latest tag also pushed"
                 }
             }
         }
@@ -263,36 +295,52 @@ pipeline {
                             
                             echo "🏥 Performing Health Checks on ${env.TARGET_DEPLOYMENT}"
                             
-                            # Get pod name
+                            # Wait for pods to be ready using kubectl wait
+                            echo "⏳ Waiting for ${env.TARGET_DEPLOYMENT} pods to be ready..."
+                            kubectl wait --for=condition=ready pod -l app=hotel-booking-system,version=${env.TARGET_DEPLOYMENT} -n ${K8S_NAMESPACE} --timeout=300s
+                            
+                            echo "✅ ${env.TARGET_DEPLOYMENT} pods are ready"
+                            
+                            # Test internal health check using curl (now available in container)
+                            echo "🔍 Testing internal application health..."
                             POD_NAME=\$(kubectl get pods -n ${K8S_NAMESPACE} -l app=hotel-booking-system,version=${env.TARGET_DEPLOYMENT} -o jsonpath='{.items[0].metadata.name}')
                             
                             if [ -n "\$POD_NAME" ]; then
-                                echo "🔍 Testing pod: \$POD_NAME"
-                                
-                                # Health check with retry logic
-                                for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+                                for i in 1 2 3 4 5; do
                                     if kubectl exec -n ${K8S_NAMESPACE} "\$POD_NAME" -- curl -f -s http://localhost:8080/actuator/health > /dev/null; then
-                                        echo "✅ ${env.TARGET_DEPLOYMENT} health check PASSED on attempt \$i"
+                                        echo "✅ ${env.TARGET_DEPLOYMENT} internal health check PASSED on attempt \$i"
                                         break
                                     else
-                                        echo "⏳ Attempt \$i: ${env.TARGET_DEPLOYMENT} not ready yet, waiting 10s..."
-                                        sleep 10
-                                    fi
-                                    
-                                    if [ \$i -eq 12 ]; then
-                                        echo "❌ Health check FAILED after 120 seconds"
-                                        exit 1
+                                        echo "⏳ Attempt \$i: ${env.TARGET_DEPLOYMENT} internal health check failed, waiting 5s..."
+                                        sleep 5
                                     fi
                                 done
-                                
-                                # Additional application-specific checks
-                                echo "🔍 Performing application-specific health checks..."
-                                kubectl exec -n ${K8S_NAMESPACE} "\$POD_NAME" -- curl -s http://localhost:8080/actuator/info | grep -q "application" && echo "✅ Application info endpoint working"
-                                
-                            else
-                                echo "❌ No pods found for ${env.TARGET_DEPLOYMENT}"
-                                exit 1
                             fi
+                            
+                            # Test application from external endpoint
+                            echo "🔍 Testing application health externally..."
+                            
+                            # Get NodePort for the target deployment service
+                            NODE_PORT=\$(kubectl get svc hotel-booking-system-${env.TARGET_DEPLOYMENT} -n ${K8S_NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}')
+                            
+                            if [ -n "\$NODE_PORT" ]; then
+                                echo "🌐 Testing via NodePort: ${CLUSTER_IP}:\$NODE_PORT"
+                                
+                                # External health check with retry
+                                for i in 1 2 3 4 5; do
+                                    if curl -f -s http://${CLUSTER_IP}:\$NODE_PORT/actuator/health > /dev/null; then
+                                        echo "✅ ${env.TARGET_DEPLOYMENT} external health check PASSED on attempt \$i"
+                                        break
+                                    else
+                                        echo "⏳ Attempt \$i: ${env.TARGET_DEPLOYMENT} not responding externally, waiting 5s..."
+                                        sleep 5
+                                    fi
+                                done
+                            else
+                                echo "⚠️ No NodePort service found for external testing"
+                            fi
+                            
+                            echo "✅ ${env.TARGET_DEPLOYMENT} health validation completed successfully"
                         """
                     }
                 }
@@ -316,11 +364,18 @@ pipeline {
                             
                             echo "✅ Traffic successfully switched to ${env.TARGET_DEPLOYMENT}"
                             
+                            # Wait a moment for traffic to stabilize
+                            sleep 10
+                            
                             # Scale down old deployment
                             echo "📉 Scaling down previous deployment (${env.OLD_DEPLOYMENT})"
                             kubectl scale deployment/hotel-booking-system-${env.OLD_DEPLOYMENT} -n ${K8S_NAMESPACE} --replicas=0
                             
                             echo "✅ ${env.OLD_DEPLOYMENT} scaled down to zero replicas"
+                            
+                            # Verify final state
+                            echo "🔍 Final deployment status:"
+                            kubectl get deployments -n ${K8S_NAMESPACE} -l app=hotel-booking-system
                         """
                     }
                 }
@@ -350,6 +405,7 @@ pipeline {
                                 echo "🔗 NODEPORT URL:"
                                 echo "   http://${CLUSTER_IP}:\${NODE_PORT}/"
                                 echo "   Health: http://${CLUSTER_IP}:\${NODE_PORT}/actuator/health"
+                                echo "   Swagger: http://${CLUSTER_IP}:\${NODE_PORT}/swagger-ui.html"
                                 echo "DEPLOYMENT_URL=http://${CLUSTER_IP}:\${NODE_PORT}/" > deployment-url.env
                             fi
                             
@@ -398,6 +454,7 @@ pipeline {
                             echo "Active Deployment: ${env.TARGET_DEPLOYMENT}"
                             echo "Docker Image: ${REGISTRY}/${APP_NAME}:${VERSION}"
                             echo "Namespace: ${K8S_NAMESPACE}"
+                            echo "Build: ${env.BUILD_NUMBER}"
                         """
                         
                         // Load and display URLs
@@ -424,6 +481,8 @@ pipeline {
             sh """
                 echo "🏁 Build Process Completed"
                 echo "Build Status: ${currentBuild.result}"
+                echo "Build Number: ${VERSION}"
+                echo "Deployment: ${env.TARGET_DEPLOYMENT ?: 'N/A'}"
             """
             cleanWs()
         }

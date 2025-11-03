@@ -1,0 +1,7 @@
+com/hotel/model/HotelModelTest.class
+com/hotel/service/UserServiceTest.class
+com/hotel/SimpleHealthTest.class
+com/hotel/ApplicationStartupTest.class
+com/hotel/repository/UserRepositoryTest.class
+com/hotel/model/UserModelTest.class
+com/hotel/SmokeTest.class

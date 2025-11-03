@@ -87,7 +87,7 @@ import java.util.Optional;
 <span class="fc" id="L87">            Optional&lt;com.hotel.model.Room&gt; roomOpt = roomService.getRoomById(roomId);</span>
 <span class="fc" id="L88">            Optional&lt;com.hotel.model.Hotel&gt; hotelOpt = hotelService.getHotelById(hotelId);</span>
             
-<span class="pc bpc" id="L90" title="3 of 6 branches missed.">            if (userOpt.isPresent() &amp;&amp; roomOpt.isPresent() &amp;&amp; hotelOpt.isPresent()) {</span>
+<span class="pc bpc" id="L90" title="2 of 6 branches missed.">            if (userOpt.isPresent() &amp;&amp; roomOpt.isPresent() &amp;&amp; hotelOpt.isPresent()) {</span>
                 // Create booking object
 <span class="fc" id="L92">                Booking booking = new Booking();</span>
 <span class="fc" id="L93">                booking.setCheckInDate(checkInDate);</span>
@@ -104,35 +104,35 @@ import java.util.Optional;
 <span class="fc" id="L104">                    return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
                 }
                 
-<span class="pc bpc" id="L107" title="2 of 4 branches missed.">                if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {</span>
-<span class="nc" id="L108">                    redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Check-out date must be after check-in date&quot;);</span>
-<span class="nc" id="L109">                    return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
+<span class="pc bpc" id="L107" title="1 of 4 branches missed.">                if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {</span>
+<span class="fc" id="L108">                    redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Check-out date must be after check-in date&quot;);</span>
+<span class="fc" id="L109">                    return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
                 }
                 
                 // Check room availability
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">                if (!bookingService.isRoomAvailable(roomId, booking.getCheckInDate(), booking.getCheckOutDate())) {</span>
-<span class="nc" id="L114">                    redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Room is not available for the selected dates&quot;);</span>
-<span class="nc" id="L115">                    return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">                if (!bookingService.isRoomAvailable(roomId, booking.getCheckInDate(), booking.getCheckOutDate())) {</span>
+<span class="fc" id="L114">                    redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Room is not available for the selected dates&quot;);</span>
+<span class="fc" id="L115">                    return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
                 }
                 
 <span class="fc" id="L118">                Booking savedBooking = bookingService.createBooking(booking);</span>
 <span class="fc" id="L119">                redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;Booking confirmed successfully!&quot;);</span>
 <span class="fc" id="L120">                return &quot;redirect:/bookings/confirmation/&quot; + savedBooking.getId();</span>
             } else {
-<span class="nc" id="L122">                redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Invalid booking details&quot;);</span>
-<span class="nc" id="L123">                return &quot;redirect:/hotels&quot;;</span>
+<span class="fc" id="L122">                redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Invalid booking details&quot;);</span>
+<span class="fc" id="L123">                return &quot;redirect:/hotels&quot;;</span>
             }
-<span class="nc" id="L125">        } catch (Exception e) {</span>
-<span class="nc" id="L126">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Error creating booking: &quot; + e.getMessage());</span>
-<span class="nc" id="L127">            return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
+<span class="fc" id="L125">        } catch (Exception e) {</span>
+<span class="fc" id="L126">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Error creating booking: &quot; + e.getMessage());</span>
+<span class="fc" id="L127">            return &quot;redirect:/bookings/new/&quot; + roomId + &quot;?hotelId=&quot; + hotelId;</span>
         }
     }
     
     @GetMapping(&quot;/confirmation/{id}&quot;)
     public String bookingConfirmation(@PathVariable Long id, Model model, HttpSession session) {
 <span class="fc" id="L133">        Long userId = (Long) session.getAttribute(&quot;userId&quot;);</span>
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (userId == null) {</span>
-<span class="nc" id="L135">            return &quot;redirect:/auth/login&quot;;</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        if (userId == null) {</span>
+<span class="fc" id="L135">            return &quot;redirect:/auth/login&quot;;</span>
         }
         
 <span class="fc" id="L138">        bookingService.getBookingById(id).ifPresent(booking -&gt; {</span>
@@ -174,8 +174,8 @@ import java.util.Optional;
         try {
 <span class="fc" id="L175">            bookingService.cancelBooking(id);</span>
 <span class="fc" id="L176">            redirectAttributes.addFlashAttribute(&quot;success&quot;, &quot;Booking cancelled successfully&quot;);</span>
-<span class="nc" id="L177">        } catch (Exception e) {</span>
-<span class="nc" id="L178">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Error cancelling booking&quot;);</span>
+<span class="fc" id="L177">        } catch (Exception e) {</span>
+<span class="fc" id="L178">            redirectAttributes.addFlashAttribute(&quot;error&quot;, &quot;Error cancelling booking&quot;);</span>
 <span class="fc" id="L179">        }</span>
         
 <span class="fc" id="L181">        return &quot;redirect:/bookings/my-bookings&quot;;</span>

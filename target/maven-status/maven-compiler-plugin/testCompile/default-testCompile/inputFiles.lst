@@ -6,6 +6,7 @@
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/controller/HotelControllerTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/model/UserModelTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/controller/HealthControllerTest.java
+/home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/controller/ProfileControllerTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/model/HotelModelTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/dto/UserRegistrationDTOTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/service/ReviewServiceTest.java
@@ -13,6 +14,7 @@
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/util/DatabaseHealthCheckTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/service/UserServiceTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/service/HotelServiceTest.java
+/home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/controller/ReviewControllerTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/service/RoomServiceTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/controller/HomeControllerTest.java
 /home/saifudheen/Projects/Hotel-Booking-System/src/test/java/com/hotel/SmokeTest.java

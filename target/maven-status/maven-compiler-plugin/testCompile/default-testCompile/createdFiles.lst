@@ -3,12 +3,15 @@ com/hotel/model/HotelModelTest.class
 com/hotel/controller/HomeControllerTest.class
 com/hotel/mapper/UserMapperTest.class
 com/hotel/service/BookingServiceTest.class
+com/hotel/controller/HealthControllerTest$1.class
 com/hotel/util/DatabaseHealthCheckTest.class
 com/hotel/service/HotelServiceTest.class
 com/hotel/service/ReviewServiceTest.class
 com/hotel/controller/HotelControllerTest.class
+com/hotel/controller/ReviewControllerTest.class
 com/hotel/service/UserServiceTest.class
 com/hotel/dto/ProfileUpdateDTOTest.class
+com/hotel/controller/ProfileControllerTest.class
 com/hotel/dto/UserDTOTest.class
 com/hotel/controller/AuthControllerTest.class
 com/hotel/dto/UserRegistrationDTOTest.class

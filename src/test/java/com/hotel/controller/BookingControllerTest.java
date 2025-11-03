@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -96,6 +97,9 @@ class BookingControllerTest {
         verify(model).addAttribute(eq("room"), any(Room.class));
         verify(model).addAttribute(eq("hotel"), any(Hotel.class));
         verify(model).addAttribute(eq("booking"), any(Booking.class));
+        verify(model).addAttribute(eq("minDate"), anyString());
+        verify(model).addAttribute(eq("checkInDate"), anyString());
+        verify(model).addAttribute(eq("checkOutDate"), anyString());
     }
 
     @Test
@@ -105,6 +109,18 @@ class BookingControllerTest {
         String result = bookingController.showBookingForm(1L, 1L, model, session);
 
         assertEquals("redirect:/auth/login", result);
+    }
+
+    @Test
+    void showBookingForm_WithNonExistentRoom_ShouldStillReturnForm() {
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(roomService.getRoomById(1L)).thenReturn(Optional.empty());
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+
+        String result = bookingController.showBookingForm(1L, 1L, model, session);
+
+        assertEquals("booking-form", result);
+        // Should not throw exception even if room doesn't exist
     }
 
     @Test
@@ -123,6 +139,7 @@ class BookingControllerTest {
 
         assertEquals("redirect:/bookings/confirmation/1", result);
         verify(redirectAttributes).addFlashAttribute("success", "Booking confirmed successfully!");
+        verify(bookingService).createBooking(any(Booking.class));
     }
 
     @Test
@@ -139,6 +156,72 @@ class BookingControllerTest {
 
         assertEquals("redirect:/bookings/new/1?hotelId=1", result);
         verify(redirectAttributes).addFlashAttribute("error", "Check-in date cannot be in the past");
+        verify(bookingService, never()).createBooking(any(Booking.class));
+    }
+
+    @Test
+    void createBooking_WithInvalidDates_ShouldReturnError() {
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+        when(roomService.getRoomById(1L)).thenReturn(Optional.of(room));
+        when(hotelService.getHotelById(1L)).thenReturn(Optional.of(hotel));
+
+        String result = bookingController.createBooking(
+            1L, 1L, LocalDate.now().plusDays(3), LocalDate.now().plusDays(1),
+            2, "", session, redirectAttributes
+        );
+
+        assertEquals("redirect:/bookings/new/1?hotelId=1", result);
+        verify(redirectAttributes).addFlashAttribute("error", "Check-out date must be after check-in date");
+    }
+
+    @Test
+    void createBooking_WithUnavailableRoom_ShouldReturnError() {
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+        when(roomService.getRoomById(1L)).thenReturn(Optional.of(room));
+        when(hotelService.getHotelById(1L)).thenReturn(Optional.of(hotel));
+        when(bookingService.isRoomAvailable(anyLong(), any(LocalDate.class), any(LocalDate.class))).thenReturn(false);
+
+        String result = bookingController.createBooking(
+            1L, 1L, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3),
+            2, "", session, redirectAttributes
+        );
+
+        assertEquals("redirect:/bookings/new/1?hotelId=1", result);
+        verify(redirectAttributes).addFlashAttribute("error", "Room is not available for the selected dates");
+    }
+
+    @Test
+    void createBooking_WithMissingData_ShouldReturnError() {
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(userService.findById(1L)).thenReturn(Optional.empty());
+
+        String result = bookingController.createBooking(
+            1L, 1L, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3),
+            2, "", session, redirectAttributes
+        );
+
+        assertEquals("redirect:/hotels", result);
+        verify(redirectAttributes).addFlashAttribute("error", "Invalid booking details");
+    }
+
+    @Test
+    void createBooking_WithException_ShouldReturnError() {
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+        when(roomService.getRoomById(1L)).thenReturn(Optional.of(room));
+        when(hotelService.getHotelById(1L)).thenReturn(Optional.of(hotel));
+        when(bookingService.isRoomAvailable(anyLong(), any(LocalDate.class), any(LocalDate.class))).thenReturn(true);
+        when(bookingService.createBooking(any(Booking.class))).thenThrow(new RuntimeException("Database error"));
+
+        String result = bookingController.createBooking(
+            1L, 1L, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3),
+            2, "", session, redirectAttributes
+        );
+
+        assertEquals("redirect:/bookings/new/1?hotelId=1", result);
+        verify(redirectAttributes).addFlashAttribute("error", "Error creating booking: Database error");
     }
 
     @Test
@@ -155,14 +238,25 @@ class BookingControllerTest {
     }
 
     @Test
+    void bookingConfirmation_WithoutUser_ShouldRedirectToLogin() {
+        when(session.getAttribute("userId")).thenReturn(null);
+
+        String result = bookingController.bookingConfirmation(1L, model, session);
+
+        assertEquals("redirect:/auth/login", result);
+    }
+
+    @Test
     void getMyBookings_ShouldReturnUserBookings() {
         when(session.getAttribute("userId")).thenReturn(1L);
         when(userService.findById(1L)).thenReturn(Optional.of(user));
+        when(bookingService.getBookingsByUserId(1L)).thenReturn(Arrays.asList(booking));
 
         String result = bookingController.getMyBookings(model, session);
 
         assertEquals("my-bookings", result);
         verify(bookingService).getBookingsByUserId(1L);
+        verify(model).addAttribute("bookings", Arrays.asList(booking));
     }
 
     @Test
@@ -174,5 +268,16 @@ class BookingControllerTest {
         assertEquals("redirect:/bookings/my-bookings", result);
         verify(bookingService).cancelBooking(1L);
         verify(redirectAttributes).addFlashAttribute("success", "Booking cancelled successfully");
+    }
+
+    @Test
+    void cancelBooking_WithException_ShouldShowError() {
+        when(session.getAttribute("userId")).thenReturn(1L);
+        doThrow(new RuntimeException("Database error")).when(bookingService).cancelBooking(1L);
+
+        String result = bookingController.cancelBooking(1L, session, redirectAttributes);
+
+        assertEquals("redirect:/bookings/my-bookings", result);
+        verify(redirectAttributes).addFlashAttribute("error", "Error cancelling booking");
     }
 }

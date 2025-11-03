@@ -53,6 +53,21 @@ class HotelControllerTest {
         assertEquals("hotels", result);
         verify(hotelService).getAllHotels();
         verify(hotelService).getAllCities();
+        verify(model).addAttribute("selectedCity", "");
+        verify(model).addAttribute("searchQuery", "");
+    }
+
+    @Test
+    void getAllHotels_WithLoggedInUser_ShouldAddUserToModel() {
+        User user = new User();
+        user.setId(1L);
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+
+        String result = hotelController.getAllHotels(model, session);
+
+        assertEquals("hotels", result);
+        verify(model).addAttribute(eq("currentUser"), any(User.class));
     }
 
     @Test
@@ -70,6 +85,19 @@ class HotelControllerTest {
         verify(model).addAttribute("hotel", hotel);
         verify(roomService).getAvailableRoomsByHotelId(1L);
         verify(reviewService).getReviewsByHotelId(1L);
+        verify(reviewService).getAverageRatingForHotel(1L);
+        verify(reviewService).getReviewCountForHotel(1L);
+    }
+
+    @Test
+    void getHotelById_WithNonExistentHotel_ShouldStillReturnView() {
+        when(hotelService.getHotelById(1L)).thenReturn(Optional.empty());
+        when(session.getAttribute("userId")).thenReturn(null);
+
+        String result = hotelController.getHotelById(1L, model, session);
+
+        assertEquals("hotel-rooms", result);
+        // Should not throw exception even if hotel doesn't exist
     }
 
     @Test
@@ -81,6 +109,8 @@ class HotelControllerTest {
 
         assertEquals("hotels", result);
         verify(hotelService).searchHotels("test");
+        verify(model).addAttribute("searchQuery", "test");
+        verify(model).addAttribute("selectedCity", "");
     }
 
     @Test
@@ -92,6 +122,18 @@ class HotelControllerTest {
 
         assertEquals("hotels", result);
         verify(hotelService).getHotelsByCity("New York");
+        verify(model).addAttribute("searchQuery", "");
+        verify(model).addAttribute("selectedCity", "New York");
+    }
+
+    @Test
+    void searchHotels_WithEmptyParams_ShouldReturnAllHotels() {
+        when(session.getAttribute("userId")).thenReturn(null);
+
+        String result = hotelController.searchHotels("", "", model, session);
+
+        assertEquals("hotels", result);
+        verify(hotelService).getAllHotels();
     }
 
     @Test
@@ -102,5 +144,20 @@ class HotelControllerTest {
 
         assertEquals("hotels", result);
         verify(hotelService).getHotelsByCity("New York");
+        verify(model).addAttribute("selectedCity", "New York");
+        verify(model).addAttribute("searchQuery", "");
+    }
+
+    @Test
+    void getHotelsByCity_WithLoggedInUser_ShouldAddUserToModel() {
+        User user = new User();
+        user.setId(1L);
+        when(session.getAttribute("userId")).thenReturn(1L);
+        when(userService.findById(1L)).thenReturn(Optional.of(user));
+
+        String result = hotelController.getHotelsByCity("New York", model, session);
+
+        assertEquals("hotels", result);
+        verify(model).addAttribute(eq("currentUser"), any(User.class));
     }
 }

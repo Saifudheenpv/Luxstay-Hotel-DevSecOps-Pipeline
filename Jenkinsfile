@@ -38,7 +38,7 @@ pipeline {
                 cleanWs()
                 sh '''
                     echo "🚀 Starting Fresh Build - Hotel Booking System"
-                    echo "Build Number: ${BUILD_NUMBER}"
+                    echo "Build Number: '${BUILD_NUMBER}'"
                 '''
             }
         }
@@ -49,7 +49,7 @@ pipeline {
                 sh '''
                     echo "📦 Git Repository Information"
                     git log -1 --oneline
-                    echo "Branch: ${GIT_BRANCH}"
+                    echo "Branch: '${GIT_BRANCH}'"
                 '''
             }
         }
@@ -81,14 +81,7 @@ pipeline {
                 always {
                     junit 'target/surefire-reports/**/*.xml'
                     archiveArtifacts 'target/site/jacoco/jacoco.xml'
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'target/site/jacoco',
-                        reportFiles: 'index.html',
-                        reportName: 'JaCoCo Code Coverage'
-                    ])
+                    // Removed publishHTML as plugin is not available
                 }
             }
         }
@@ -165,11 +158,6 @@ pipeline {
                         docker.image("${REGISTRY}/${APP_NAME}:${VERSION}").push()
                     }
                     echo "✅ Docker image pushed: ${REGISTRY}/${APP_NAME}:${VERSION}"
-                    
-                    // Also tag as latest for rollback capability
-                    docker.withRegistry('', 'dockerhub-creds') {
-                        docker.image("${REGISTRY}/${APP_NAME}:${VERSION}").push('latest')
-                    }
                 }
             }
         }
@@ -280,7 +268,7 @@ pipeline {
                                 echo "🔍 Testing pod: \$POD_NAME"
                                 
                                 # Health check with retry logic
-                                for i in {1..12}; do
+                                for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
                                     if kubectl exec -n ${K8S_NAMESPACE} "\$POD_NAME" -- curl -f -s http://localhost:8080/actuator/health > /dev/null; then
                                         echo "✅ ${env.TARGET_DEPLOYMENT} health check PASSED on attempt \$i"
                                         break
@@ -360,19 +348,19 @@ pipeline {
                                 echo "🔗 NODEPORT URL:"
                                 echo "   http://${CLUSTER_IP}:\${NODE_PORT}/"
                                 echo "   Health: http://${CLUSTER_IP}:\${NODE_PORT}/actuator/health"
-                                echo "   DEPLOYMENT_URL=http://${CLUSTER_IP}:\${NODE_PORT}/" > deployment-url.env
+                                echo "DEPLOYMENT_URL=http://${CLUSTER_IP}:\${NODE_PORT}/" > deployment-url.env
                             fi
                             
                             if [ "\$ALB_URL" != "Not configured" ] && [ "\$ALB_URL" != "" ]; then
                                 echo "🚀 ALB URL:"
                                 echo "   http://\${ALB_URL}/"
-                                echo "   ALB_URL=http://\${ALB_URL}/" >> deployment-url.env
+                                echo "ALB_URL=http://\${ALB_URL}/" >> deployment-url.env
                             fi
                             
                             if [ "\$LB_URL" != "Not configured" ] && [ "\$LB_URL" != "" ]; then
                                 echo "⚡ LOAD BALANCER URL:"
                                 echo "   http://\${LB_URL}/"
-                                echo "   LB_URL=http://\${LB_URL}/" >> deployment-url.env
+                                echo "LB_URL=http://\${LB_URL}/" >> deployment-url.env
                             fi
                             
                             echo ""
@@ -433,7 +421,7 @@ pipeline {
         always {
             sh '''
                 echo "🏁 Build Process Completed"
-                echo "Build Status: ${currentBuild.result}"
+                echo "Build Status: ' + currentBuild.result + '"
             '''
             cleanWs()
         }

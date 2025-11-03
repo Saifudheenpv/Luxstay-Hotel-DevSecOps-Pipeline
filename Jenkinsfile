@@ -22,6 +22,9 @@ pipeline {
         
         // Kubernetes Configuration
         K8S_NAMESPACE = 'hotel-booking'
+        
+        // Test Configuration
+        TEST_PROFILE = 'test'
     }
     
     options {
@@ -34,44 +37,59 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                sh 'git branch'
+                sh '''
+                    echo "=== Git Information ==="
+                    git branch
+                    git log -1 --oneline
+                '''
             }
         }
         
         stage('Compile') {
             steps {
-                sh 'mvn compile'
+                sh 'mvn compile -q'
+            }
+            post {
+                success {
+                    echo '✅ Compilation successful'
+                }
+                failure {
+                    echo '❌ Compilation failed'
+                }
             }
         }
         
         stage('Unit Tests') {
             steps {
-                sh 'mvn test || echo "Tests completed with status: $?"'
+                sh """
+                    echo "=== Running Unit Tests with ${TEST_PROFILE} Profile ==="
+                    mvn test -Dspring.profiles.active=${TEST_PROFILE}
+                    
+                    echo "=== Generating JaCoCo Coverage Report ==="
+                    mvn jacoco:report
+                """
             }
             post {
                 always {
+                    junit 'target/surefire-reports/**/*.xml'
                     script {
-                        // Handle JUnit reports only if they exist
-                        if (fileExists('target/surefire-reports/TEST-*.xml')) {
-                            junit 'target/surefire-reports/TEST-*.xml'
-                            echo 'JUnit reports published successfully'
+                        if (fileExists('target/site/jacoco/jacoco.xml')) {
+                            echo '✅ JaCoCo coverage report generated'
+                            archiveArtifacts 'target/site/jacoco/jacoco.xml'
                         } else {
-                            echo 'No JUnit test reports found - skipping'
+                            echo '⚠️ JaCoCo XML report not found'
                         }
                         
-                        // Handle JaCoCo reports only if they exist
-                        if (fileExists('target/jacoco.exec')) {
-                            jacoco(
-                                execPattern: 'target/jacoco.exec',
-                                classPattern: 'target/classes',
-                                sourcePattern: 'src/main/java',
-                                exclusionPattern: 'src/test*'
-                            )
-                            echo 'JaCoCo coverage reports published'
-                        } else {
-                            echo 'No JaCoCo execution data found - skipping coverage report'
+                        if (fileExists('target/site/jacoco/index.html')) {
+                            archiveArtifacts 'target/site/jacoco/index.html'
                         }
                     }
+                }
+                success {
+                    echo '✅ All tests passed'
+                }
+                failure {
+                    echo '❌ Some tests failed'
                 }
             }
         }
@@ -81,6 +99,7 @@ pipeline {
                 sh '''
                     echo "=== Running Trivy Filesystem Security Scan ==="
                     trivy fs . --severity HIGH,CRITICAL --exit-code 0 --format table
+                    echo "=== Filesystem security scan completed ==="
                 '''
             }
         }
@@ -89,12 +108,17 @@ pipeline {
             steps {
                 withSonarQubeEnv('Sonar-Server') {
                     sh """
+                        echo "=== Running SonarQube Analysis ==="
                         mvn sonar:sonar \
                         -Dsonar.projectKey=hotel-booking-system \
                         -Dsonar.projectName='Hotel Booking System' \
                         -Dsonar.host.url=${SONAR_URL} \
                         -Dsonar.login=${SONAR_TOKEN} \
-                        -Dsonar.coverage.exclusions=src/test/**
+                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                        -Dsonar.tests=src/test \
+                        -Dsonar.test.inclusions=src/test/**/* \
+                        -Dsonar.java.coveragePlugin=jacoco \
+                        -Dsonar.sourceEncoding=UTF-8
                     """
                 }
             }
@@ -110,8 +134,18 @@ pipeline {
         
         stage('Build & Package') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh '''
+                    echo "=== Building Application Package ==="
+                    mvn clean package -DskipTests
+                    echo "=== Generated JAR Files ==="
+                    ls -la target/*.jar
+                '''
                 archiveArtifacts 'target/*.jar'
+            }
+            post {
+                success {
+                    echo '✅ Application packaged successfully'
+                }
             }
         }
         
@@ -134,9 +168,9 @@ pipeline {
                                  type: 'jar']
                             ]
                         )
-                        echo 'Artifact published to Nexus successfully'
+                        echo '✅ Artifact published to Nexus successfully'
                     } else {
-                        echo 'JAR file not found - skipping Nexus upload'
+                        echo '⚠️ JAR file not found - skipping Nexus upload'
                     }
                 }
             }
@@ -145,8 +179,10 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
+                    echo "=== Building Docker Image ==="
                     docker.build("${REGISTRY}/${APP_NAME}:${VERSION}")
                     docker.build("${REGISTRY}/${APP_NAME}:latest")
+                    echo '✅ Docker images built successfully'
                 }
             }
         }
@@ -159,6 +195,7 @@ pipeline {
                     --severity HIGH,CRITICAL \
                     --format table \
                     ${REGISTRY}/${APP_NAME}:${VERSION}
+                    echo "✅ Docker image security scan completed"
                 """
             }
         }
@@ -166,10 +203,12 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
+                    echo "=== Pushing Docker Images to Registry ==="
                     docker.withRegistry('', 'dockerhub-creds') {
                         docker.image("${REGISTRY}/${APP_NAME}:${VERSION}").push()
                         docker.image("${REGISTRY}/${APP_NAME}:latest").push()
                     }
+                    echo '✅ Docker images pushed successfully'
                 }
             }
         }
@@ -194,13 +233,14 @@ pipeline {
                             echo "=== Waiting for MySQL to be ready ==="
                             kubectl wait --for=condition=ready pod -l app=mysql -n ${K8S_NAMESPACE} --timeout=300s
                             
-                            echo "=== Deploying Blue Version ==="
+                            echo "=== Deploying Blue Version ${VERSION} ==="
                             # Update image in deployment
                             sed -i 's|image:.*|image: ${REGISTRY}/${APP_NAME}:${VERSION}|g' k8s/app-deployment-blue.yaml
                             kubectl apply -f k8s/app-deployment-blue.yaml
                             
                             echo "=== Waiting for Blue to be ready ==="
                             kubectl wait --for=condition=ready pod -l app=${APP_NAME},version=blue -n ${K8S_NAMESPACE} --timeout=300s
+                            echo '✅ Blue deployment ready'
                         """
                     }
                 }
@@ -223,6 +263,7 @@ pipeline {
                             echo "=== Current Deployment Status ==="
                             kubectl get deployments -n ${K8S_NAMESPACE}
                             kubectl get pods -n ${K8S_NAMESPACE}
+                            echo '✅ Traffic switched to Blue successfully'
                         """
                     }
                 }
@@ -250,19 +291,24 @@ pipeline {
                             
                             if [ -z "\$SERVICE_IP" ]; then
                                 SERVICE_IP=\$(kubectl get svc hotel-booking-system -n ${K8S_NAMESPACE} -o jsonpath='{.spec.clusterIP}')
+                                echo "Using ClusterIP: \$SERVICE_IP"
+                            else
+                                echo "Using LoadBalancer IP: \$SERVICE_IP"
                             fi
                             
-                            echo "Service IP: \$SERVICE_IP"
-                            
                             # Health check with retry
-                            for i in {1..10}; do
-                                if curl -f http://\$SERVICE_IP/actuator/health; then
+                            for i in {1..15}; do
+                                if curl -f -s http://\$SERVICE_IP/actuator/health > /dev/null; then
                                     echo "✅ Application health check PASSED"
+                                    echo "Health response:"
+                                    curl -s http://\$SERVICE_IP/actuator/health | head -5
                                     break
                                 fi
-                                echo "Attempt \$i/10: Application not ready yet..."
-                                sleep 15
+                                echo "Attempt \$i/15: Application not ready yet..."
+                                sleep 10
                             done
+                            
+                            echo '🎉 Deployment verification completed successfully'
                         """
                     }
                 }

@@ -38,7 +38,7 @@ pipeline {
                 cleanWs()
                 sh '''
                     echo "🚀 Starting Fresh Build - Hotel Booking System"
-                    echo "Build Number: '${BUILD_NUMBER}'"
+                    echo "Build Number: ${BUILD_NUMBER}"
                 '''
             }
         }
@@ -49,7 +49,7 @@ pipeline {
                 sh '''
                     echo "📦 Git Repository Information"
                     git log -1 --oneline
-                    echo "Branch: '${GIT_BRANCH}'"
+                    echo "Branch: ${GIT_BRANCH}"
                 '''
             }
         }
@@ -81,7 +81,6 @@ pipeline {
                 always {
                     junit 'target/surefire-reports/**/*.xml'
                     archiveArtifacts 'target/site/jacoco/jacoco.xml'
-                    // Removed publishHTML as plugin is not available
                 }
             }
         }
@@ -196,18 +195,19 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                        // Determine deployment strategy
-                        def deploymentInfo = sh(
+                        // Determine deployment strategy - ONLY get the deployment line
+                        def deploymentLine = sh(
                             script: """
                                 export KUBECONFIG=\${KUBECONFIG_FILE}
                                 
-                                echo "🎯 Analyzing Deployment State"
+                                # Get deployment status quietly
                                 BLUE_READY=\$(kubectl get deployment hotel-booking-system-blue -n ${K8S_NAMESPACE} --ignore-not-found -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
                                 GREEN_READY=\$(kubectl get deployment hotel-booking-system-green -n ${K8S_NAMESPACE} --ignore-not-found -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
                                 
-                                echo "🔵 Blue replicas: \$BLUE_READY"
-                                echo "🟢 Green replicas: \$GREEN_READY"
+                                echo "Blue replicas: \$BLUE_READY"
+                                echo "Green replicas: \$GREEN_READY"
                                 
+                                # Determine target and output ONLY the deployment info
                                 if [ "\$BLUE_READY" -eq "0" ] && [ "\$GREEN_READY" -eq "0" ]; then
                                     echo "blue:green:first"
                                 elif [ "\$BLUE_READY" -gt "0" ]; then
@@ -219,14 +219,16 @@ pipeline {
                             returnStdout: true
                         ).trim()
                         
+                        // Extract only the last line (the deployment info)
+                        def deploymentInfo = deploymentLine.readLines().last()
                         def (TARGET_DEPLOYMENT, OLD_DEPLOYMENT, DEPLOYMENT_TYPE) = deploymentInfo.tokenize(':')
                         
                         env.TARGET_DEPLOYMENT = TARGET_DEPLOYMENT
                         env.OLD_DEPLOYMENT = OLD_DEPLOYMENT
                         
                         echo "🎯 Deployment Strategy: ${DEPLOYMENT_TYPE}"
-                        echo "🎯 Target: ${TARGET_DEPLOYMENT}"
-                        echo "🎯 Old: ${OLD_DEPLOYMENT}"
+                        echo "🎯 Target Deployment: ${TARGET_DEPLOYMENT}"
+                        echo "🎯 Old Deployment: ${OLD_DEPLOYMENT}"
                         
                         // Deploy to target environment
                         sh """
@@ -419,10 +421,10 @@ pipeline {
     
     post {
         always {
-            sh '''
+            sh """
                 echo "🏁 Build Process Completed"
-                echo "Build Status: ' + currentBuild.result + '"
-            '''
+                echo "Build Status: ${currentBuild.result}"
+            """
             cleanWs()
         }
         success {

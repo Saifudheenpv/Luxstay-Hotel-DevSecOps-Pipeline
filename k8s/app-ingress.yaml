@@ -4,21 +4,14 @@ metadata:
   name: hotel-booking-ingress
   namespace: hotel-booking
   annotations:
-    # AWS ALB specific annotations
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/target-type: instance  # CHANGED to instance
     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
-    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
-    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
-    alb.ingress.kubernetes.io/success-codes: '200'
-    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
-    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
-    # Add these critical annotations
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '10'
+    alb.ingress.kubernetes.io/success-codes: '200-299'
     alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=false
-    alb.ingress.kubernetes.io/healthcheck-port: "32189"
 spec:
   ingressClassName: alb
   rules:
@@ -28,6 +21,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: hotel-booking-system-blue  # Point to the actual blue service
+            name: hotel-booking-system  # Use main LoadBalancer service
             port:
-              number: 8080  # Point to the application port
+              number: 80  # Use service port

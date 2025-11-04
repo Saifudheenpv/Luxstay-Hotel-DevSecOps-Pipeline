@@ -5,14 +5,16 @@ metadata:
   namespace: hotel-booking
   labels:
     app: hotel-booking-system
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
   type: LoadBalancer
   selector:
     app: hotel-booking-system
-    version: blue  # Match the active deployment
+    version: blue  # This will be updated by pipeline
   ports:
   - name: http
     port: 80
     targetPort: 8080
     protocol: TCP
-  externalTrafficPolicy: Local
+  externalTrafficPolicy: Cluster

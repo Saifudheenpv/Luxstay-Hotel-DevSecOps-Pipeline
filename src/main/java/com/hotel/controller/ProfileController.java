@@ -99,9 +99,9 @@ public class ProfileController {
                 
                 userService.updateUser(existingUser);
                 
-                // Update session with new data
+                // Update session with new data - use currentUser for consistency
                 UserDTO updatedUserDTO = userMapper.toDTO(existingUser);
-                session.setAttribute("user", updatedUserDTO);
+                session.setAttribute("currentUser", updatedUserDTO);
                 
                 redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
             }

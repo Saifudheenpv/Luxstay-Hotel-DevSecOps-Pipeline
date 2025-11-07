@@ -43,7 +43,7 @@
                 <p class="mb-0">Create your account</p>
             </div>
             <div class="register-body">
-                <form th:action="@{/auth/register}" method="post" th:object="${user}">
+                <form th:action="@{/auth/register}" method="post" th:object="${userRegistrationDTO}">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="firstName" class="form-label">First Name</label>

@@ -1,6 +1,7 @@
 package com.hotel.dto;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class UserDTO implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -12,12 +13,14 @@ public class UserDTO implements Serializable {
     private String lastName;
     private String phone;
     private String address;
+    private LocalDateTime createdAt;
     
     // Default constructor
     public UserDTO() {}
     
     // Constructor from User entity
-    public UserDTO(Long id, String username, String email, String firstName, String lastName, String phone, String address) {
+    public UserDTO(Long id, String username, String email, String firstName, 
+                   String lastName, String phone, String address, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -25,6 +28,7 @@ public class UserDTO implements Serializable {
         this.lastName = lastName;
         this.phone = phone;
         this.address = address;
+        this.createdAt = createdAt;
     }
     
     // Getters and Setters
@@ -48,4 +52,7 @@ public class UserDTO implements Serializable {
     
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

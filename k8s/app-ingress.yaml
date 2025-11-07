@@ -5,10 +5,16 @@ metadata:
   namespace: hotel-booking
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '10'
     alb.ingress.kubernetes.io/success-codes: '200-299'
+    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=false
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    # REMOVE the subnet annotation - let it auto-discover
+    # alb.ingress.kubernetes.io/subnets: "subnet-xxx,subnet-yyy"
 spec:
   ingressClassName: alb
   rules:

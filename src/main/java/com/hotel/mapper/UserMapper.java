@@ -19,7 +19,10 @@ public class UserMapper {
             user.getFirstName(),
             user.getLastName(),
             user.getPhone(),
-            user.getAddress()
+            user.getAddress(),
+            user.getCreatedAt()
         );
     }
+    
+    // If you have other mapping methods, keep them here
 }

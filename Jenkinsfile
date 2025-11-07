@@ -14,7 +14,7 @@ pipeline {
         
         // Use Docker Hub instead of Nexus Docker registry
         DOCKER_REGISTRY = "docker.io"
-        DOCKER_NAMESPACE = "saifudheenpv"  // Replace with your Docker Hub username
+        DOCKER_NAMESPACE = "saifudheenpv"  // Your Docker Hub username
         NEXUS_REPO_URL = "${NEXUS_URL}:8081"
         
         // Repository Names
@@ -23,8 +23,8 @@ pipeline {
         // Credentials
         KUBECONFIG = credentials('kubeconfig')
         SONAR_TOKEN = credentials('sonar-token')
-        NEXUS_CREDS = credentials('nexus-creds')  // For Maven artifacts only
-        DOCKER_CREDS = credentials('docker-token') // Your Docker Hub credentials
+        NEXUS_CREDS = credentials('nexus-creds')
+        DOCKER_CREDS = credentials('docker-token')
         GITHUB_CREDS = credentials('github-token')
         
         // Application Configuration
@@ -41,13 +41,11 @@ pipeline {
         stage('GitHub Checkout') {
             steps {
                 echo "📦 Checking out code from GitHub repository..."
-                git branch: 'main', 
-                url: 'https://github.com/saifudheenpv/Hotel-Booking-System.git',
-                credentialsId: 'github-token'
+                checkout scm
                 
                 sh '''
                     echo "=== CODE CHECKOUT COMPLETED ==="
-                    echo "Repository: Hotel-Booking-System"
+                    echo "Repository: Luxstay-Hotel-Booking-System"
                     echo "Branch: main"
                     echo "Build ID: ${BUILD_ID}"
                     ls -la
@@ -75,11 +73,6 @@ pipeline {
                 always {
                     echo "📊 Publishing test results..."
                     junit 'target/surefire-reports/*.xml'
-                    
-                    sh '''
-                        echo "=== TEST RESULTS ==="
-                        find target/surefire-reports -name "*.txt" -exec echo "Test File: {}" \\;
-                    '''
                 }
                 success {
                     echo "✅ All tests passed!"
@@ -134,11 +127,6 @@ pipeline {
                 
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
-            post {
-                always {
-                    echo "📋 OWASP Dependency check completed."
-                }
-            }
         }
         
         // STAGE 7: MAVEN BUILD PACKAGE
@@ -149,21 +137,14 @@ pipeline {
                 
                 echo "✅ Application packaged successfully!"
                 archiveArtifacts 'target/*.jar'
-                
-                sh '''
-                    echo "=== BUILD ARTIFACTS ==="
-                    ls -la target/*.jar
-                    echo "JAR File: target/${APP_NAME}-*.jar"
-                '''
             }
         }
         
-        // STAGE 8: NEXUS ARTIFACT PUBLISH (Maven only)
+        // STAGE 8: NEXUS ARTIFACT PUBLISH
         stage('Nexus Publish Artifact') {
             steps {
                 echo "📤 Publishing Maven artifact to Nexus..."
                 script {
-                    // Get the actual JAR file name
                     def jarFile = sh(script: 'ls target/*.jar', returnStdout: true).trim()
                     
                     nexusArtifactUploader(
@@ -186,57 +167,41 @@ pipeline {
             }
         }
         
-        // STAGE 9: DOCKER BUILD AND TAG (Using Docker Hub)
+        // STAGE 9: DOCKER BUILD AND TAG
         stage('Docker Build and Tag') {
             steps {
                 echo "🐳 Building Docker image for Docker Hub..."
                 script {
-                    // Login to Docker Hub
                     sh """
                     docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}
-                    """
-                    
-                    // Build Docker image
-                    sh """
                     docker build -t ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} .
                     docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
                     """
-                    
                     echo "✅ Docker image built and tagged successfully!"
-                    sh "docker images | grep ${APP_NAME}"
                 }
             }
         }
         
-        // STAGE 10: TRIVY DOCKER IMAGE SCAN
+        // STAGE 10: TRIVY SECURITY SCAN
         stage('Trivy Security Scan') {
             steps {
-                echo "🔍 Running Trivy security scan on Docker image..."
+                echo "🔍 Running Trivy security scan..."
                 script {
-                    // Install trivy if not present
                     sh '''
                     if ! command -v trivy &> /dev/null; then
-                        echo "Installing Trivy..."
                         wget https://github.com/aquasecurity/trivy/releases/download/v0.45.1/trivy_0.45.1_Linux-64bit.deb
                         sudo dpkg -i trivy_0.45.1_Linux-64bit.deb
                     fi
                     '''
-                    
-                    // Run security scan
                     sh """
-                    # Generate HTML report
                     trivy image --format template --template "@contrib/gitlab.tpl" --output trivy-security-report.html ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
-                    
-                    # Fail build on critical vulnerabilities
                     trivy image --exit-code 1 --severity CRITICAL ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
                     """
-                    
-                    echo "✅ Security scan completed!"
                 }
             }
         }
         
-        // STAGE 11: DOCKER PUSH TO DOCKER HUB
+        // STAGE 11: DOCKER PUSH
         stage('Docker Push') {
             steps {
                 echo "📤 Pushing Docker image to Docker Hub..."
@@ -245,9 +210,7 @@ pipeline {
                     docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
                     docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
                     """
-                    
-                    echo "✅ Docker images pushed to Docker Hub successfully!"
-                    sh "echo 'Images available at: https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}'"
+                    echo "✅ Docker images pushed successfully!"
                 }
             }
         }
@@ -255,87 +218,55 @@ pipeline {
         // STAGE 12: DEPLOY TO KUBERNETES
         stage('Deploy to Kubernetes') {
             steps {
-                echo "🚀 Deploying to Kubernetes cluster..."
+                echo "🚀 Deploying to Kubernetes..."
                 script {
-                    // Create namespace
                     sh """
                     kubectl apply -f k8s/namespace.yaml
-                    """
-                    
-                    // Deploy MySQL
-                    sh """
                     kubectl apply -f k8s/mysql-deployment.yaml -n ${K8S_NAMESPACE}
                     kubectl apply -f k8s/mysql-service.yaml -n ${K8S_NAMESPACE}
                     """
-                    
-                    // Wait for MySQL
                     sh """
-                    echo "⏳ Waiting for MySQL to be ready..."
                     for i in {1..30}; do
                         if kubectl get pods -n ${K8S_NAMESPACE} -l app=mysql | grep -q Running; then
                             echo "✅ MySQL is ready!"
                             break
                         fi
-                        echo "⏱️ Waiting for MySQL... (attempt \$i/30)"
+                        echo "Waiting for MySQL... (attempt \$i/30)"
                         sleep 10
                     done
                     """
-                    
-                    // Update deployment with current image tag
                     sh """
                     sed -i 's|image:.*|image: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}|g' k8s/app-deployment-blue.yaml
-                    """
-                    
-                    // Deploy application
-                    sh """
                     kubectl apply -f k8s/app-deployment-blue.yaml -n ${K8S_NAMESPACE}
                     kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE}
                     """
-                    
-                    echo "✅ Application deployed to Kubernetes!"
                 }
             }
         }
         
-        // STAGE 13: POST-DEPLOYMENT VERIFICATION
+        // STAGE 13: HEALTH CHECK
         stage('Health Check & Verification') {
             steps {
                 echo "🏥 Running health checks..."
                 script {
-                    // Wait for application
                     sh """
-                    echo "⏳ Waiting for application pods to be ready..."
                     for i in {1..30}; do
                         if kubectl get pods -n ${K8S_NAMESPACE} -l app=hotel-booking | grep -q Running; then
                             echo "✅ Application pods are ready!"
                             break
                         fi
-                        echo "⏱️ Waiting for application pods... (attempt \$i/30)"
+                        echo "Waiting for application pods... (attempt \$i/30)"
                         sleep 10
                     done
-                    
                     sleep 30
                     """
-                    
-                    // Health check
                     sh """
-                    # Get service details
-                    echo "=== Kubernetes Deployment Status ==="
                     kubectl get svc -n ${K8S_NAMESPACE}
                     kubectl get pods -n ${K8S_NAMESPACE}
-                    
-                    # Simple health check using port-forward
                     timeout 60s kubectl port-forward svc/hotel-booking-service 8080:8080 -n ${K8S_NAMESPACE} &
                     sleep 10
-                    
-                    if curl -f http://localhost:8080/actuator/health; then
-                        echo "✅ Health check passed!"
-                        pkill -f "kubectl port-forward"
-                    else
-                        echo "❌ Health check failed!"
-                        pkill -f "kubectl port-forward"
-                        exit 1
-                    fi
+                    curl -f http://localhost:8080/actuator/health || exit 1
+                    pkill -f "kubectl port-forward"
                     """
                 }
             }
@@ -345,83 +276,14 @@ pipeline {
     post {
         always {
             echo "📋 Pipeline execution completed!"
-            
-            // Publish reports
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: '.',
-                reportFiles: 'trivy-security-report.html',
-                reportName: 'Trivy Security Report'
-            ])
-            
-            // Cleanup
-            sh """
-            docker rmi ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || true
-            docker rmi ${DOCKER_NAMESPACE}/${APP_NAME}:latest || true
-            """
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '.', reportFiles: 'trivy-security-report.html', reportName: 'Trivy Security Report'])
             cleanWs()
         }
         success {
             echo "🎉 Pipeline executed successfully!"
-            
-            sh """
-            echo "=== DEPLOYMENT SUCCESS ==="
-            echo "Application: ${APP_NAME}"
-            echo "Version: ${APP_VERSION}"
-            echo "Docker Image: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}"
-            echo "Kubernetes Namespace: ${K8S_NAMESPACE}"
-            echo "Build URL: ${BUILD_URL}"
-            """
-            
-            emailext (
-                subject: "SUCCESS: Pipeline '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """
-                🎉 CICD Pipeline Completed Successfully!
-                
-                Application: Hotel Booking System
-                Build Number: ${env.BUILD_NUMBER}
-                Version: ${APP_VERSION}
-                
-                📊 Deployment Information:
-                - Docker Image: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
-                - Kubernetes Namespace: ${K8S_NAMESPACE}
-                - Build URL: ${env.BUILD_URL}
-                
-                🔗 Useful Links:
-                - Jenkins: http://${JENKINS_URL}:8080
-                - SonarQube: http://${SONARQUBE_URL}:9000
-                - Nexus: http://${NEXUS_URL}:8081
-                - Docker Hub: https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}
-                
-                Next: Perform smoke tests and monitor application metrics.
-                """,
-                to: "mesaifudheenpv@gmail.com"
-            )
         }
         failure {
             echo "❌ Pipeline failed!"
-            
-            emailext (
-                subject: "FAILED: Pipeline '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """
-                ❌ CICD Pipeline Failed!
-                
-                Application: Hotel Booking System
-                Build Number: ${env.BUILD_NUMBER}
-                
-                Please check the Jenkins console output for details:
-                ${env.BUILD_URL}
-                
-                Common issues:
-                - Unit test failures
-                - SonarQube quality gate failure
-                - Docker build issues
-                - Kubernetes deployment errors
-                """,
-                to: "mesaifudheenpv@gmail.com"
-            )
         }
     }
 }

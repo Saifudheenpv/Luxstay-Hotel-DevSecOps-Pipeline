@@ -97,7 +97,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "🔍 Running SonarQube code analysis..."
-                withSonarQubeEnv('sonarqube-server') {
+                withSonarQubeEnv('Sonarqube-Server') {
                     sh """
                     mvn sonar:sonar \
                       -Dsonar.projectKey=hotel-booking-system \

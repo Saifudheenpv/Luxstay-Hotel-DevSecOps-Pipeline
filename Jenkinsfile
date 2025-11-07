@@ -32,8 +32,8 @@ pipeline {
         APP_VERSION = "${env.BUILD_ID}"
         K8S_NAMESPACE = 'hotel-booking'
         
-        // Maven Configuration
-        MAVEN_OPTS = '-Xmx1024m -XX:MaxPermSize=256m'
+        // Maven Configuration - REMOVE DEPRECATED OPTIONS
+        MAVEN_OPTS = '-Xmx1024m'
     }
     
     stages {

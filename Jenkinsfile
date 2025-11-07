@@ -197,7 +197,7 @@ pipeline {
             }
         }
         
-        // STAGE 8: NEXUS ARTIFACT PUBLISH (FIXED - MAVEN DEPLOY)
+        // STAGE 8: NEXUS ARTIFACT PUBLISH (FIXED - PROPER AUTHENTICATION)
         stage('Nexus Publish Artifact') {
             steps {
                 echo "📤 Publishing Maven artifact to Nexus..."
@@ -207,9 +207,27 @@ pipeline {
                     if (jarFile) {
                         echo "Found JAR file: ${jarFile}"
                         
-                        // Using Maven deploy plugin (no additional plugins needed)
+                        // OPTION 1: Using Maven deploy with settings.xml (Recommended)
                         sh """
-                        mvn deploy:deploy-file \
+                        # Create temporary settings.xml with Nexus credentials
+                        cat > /tmp/settings.xml << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                          http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+            <id>nexus</id>
+            <username>${NEXUS_CREDS_USR}</username>
+            <password>${NEXUS_CREDS_PSW}</password>
+        </server>
+    </servers>
+</settings>
+EOF
+                        
+                        # Deploy using settings.xml
+                        mvn -s /tmp/settings.xml deploy:deploy-file \
                           -DgroupId=com.hotel \
                           -DartifactId=${APP_NAME} \
                           -Dversion=${APP_VERSION} \
@@ -425,6 +443,7 @@ pipeline {
             # Clean up temporary files
             rm -f k8s/app-deployment-*.yaml || true
             rm -f trivy-security-report.html || true
+            rm -f /tmp/settings.xml || true
             """
             cleanWs()
         }

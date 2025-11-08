@@ -10,7 +10,7 @@ pipeline {
         // Infrastructure URLs
         NEXUS_URL = '3.110.226.20'
         SONARQUBE_URL = '13.203.26.99'
-        JENKINS_URL = '3.110.149.188'
+        JENKINS_URL = '13.203.25.43'
         
         // Use Docker Hub instead of Nexus Docker registry
         DOCKER_REGISTRY = "docker.io"

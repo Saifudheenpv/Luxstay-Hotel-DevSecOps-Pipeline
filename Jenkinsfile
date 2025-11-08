@@ -464,42 +464,45 @@ pipeline {
             echo "🎉 Pipeline executed successfully!"
             
             script {
-                def deploymentInfo = """
-                🎉 Blue-Green Deployment Completed Successfully!
-                
-                📊 Deployment Details:
-                - Application: Hotel Booking System
-                - New Version: ${APP_VERSION}
-                - New Deployment: ${NEXT_DEPLOYMENT}
-                - Previous Deployment: ${CURRENT_DEPLOYMENT}
-                - Build: ${env.BUILD_NUMBER}
-                
-                🐳 Docker Images:
-                - Production: ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}
-                - Version: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
-                - Latest: ${DOCKER_NAMESPACE}/${APP_NAME}:latest
-                
-                ☸️ Kubernetes Status:
-                - Namespace: ${K8S_NAMESPACE}
-                - Active: ${params.AUTO_SWITCH ? NEXT_DEPLOYMENT : 'Manual switch required'}
-                - Ready: ${NEXT_DEPLOYMENT} deployment is ready for traffic
-                
-                ✅ Quality Gates:
-                - Code Quality: PASSED
-                - Security Scan: COMPLETED
-                - Health Checks: PASSED
-                
-                🔗 Links:
-                - Jenkins: ${env.BUILD_URL}
-                - Docker Hub: https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}
-                
-                ⚠️ Next Steps:
-                ${params.AUTO_SWITCH ? 'Traffic automatically switched to ' + NEXT_DEPLOYMENT : 'Manual traffic switch required: kubectl patch service hotel-booking-service -n ' + K8S_NAMESPACE + ' -p \\'{"spec":{"selector":{"version":"' + NEXT_DEPLOYMENT + '"}}}\\''}
-                """
+                // Fixed string interpolation - use triple quotes and proper escaping
+                def switchCommand = params.AUTO_SWITCH ? 
+                    "Traffic automatically switched to ${NEXT_DEPLOYMENT}" : 
+                    "Manual traffic switch required: kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} -p '{\"spec\":{\"selector\":{\"version\":\"${NEXT_DEPLOYMENT}\"}}}'"
                 
                 emailext (
                     subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}] - ${NEXT_DEPLOYMENT} Deployed",
-                    body: deploymentInfo,
+                    body: """
+                    🎉 Blue-Green Deployment Completed Successfully!
+                    
+                    📊 Deployment Details:
+                    - Application: Hotel Booking System
+                    - New Version: ${APP_VERSION}
+                    - New Deployment: ${NEXT_DEPLOYMENT}
+                    - Previous Deployment: ${CURRENT_DEPLOYMENT}
+                    - Build: ${env.BUILD_NUMBER}
+                    
+                    🐳 Docker Images:
+                    - Production: ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}
+                    - Version: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
+                    - Latest: ${DOCKER_NAMESPACE}/${APP_NAME}:latest
+                    
+                    ☸️ Kubernetes Status:
+                    - Namespace: ${K8S_NAMESPACE}
+                    - Active: ${params.AUTO_SWITCH ? NEXT_DEPLOYMENT : 'Manual switch required'}
+                    - Ready: ${NEXT_DEPLOYMENT} deployment is ready for traffic
+                    
+                    ✅ Quality Gates:
+                    - Code Quality: PASSED
+                    - Security Scan: COMPLETED
+                    - Health Checks: PASSED
+                    
+                    🔗 Links:
+                    - Jenkins: ${env.BUILD_URL}
+                    - Docker Hub: https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}
+                    
+                    ⚠️ Next Steps:
+                    ${switchCommand}
+                    """,
                     to: "${EMAIL_TO}",
                     replyTo: "${EMAIL_FROM}"
                 )

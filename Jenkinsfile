@@ -9,7 +9,6 @@ pipeline {
     environment {
         SONARQUBE_URL = '13.203.26.99'
         JENKINS_URL = '13.203.25.43'
-
         DOCKER_REGISTRY = "docker.io"
         DOCKER_NAMESPACE = "saifudheenpv"
 
@@ -55,8 +54,8 @@ pipeline {
     stages {
         stage('Environment Setup') {
             steps {
-                echo "🔧 Setting up build environment..."
                 script {
+                    echo "🔧 Setting up build environment..."
                     env.CURRENT_DEPLOYMENT = 'blue'
                     env.NEXT_DEPLOYMENT = 'green'
                     env.DEPLOYMENT_TYPE = params.DEPLOYMENT_STRATEGY
@@ -98,7 +97,7 @@ pipeline {
 
         stage('Secure GitHub Checkout') {
             steps {
-                echo "🔐 Securely checking out code..."
+                echo "🔐 Checking out source from GitHub..."
                 checkout scm
                 sh '''
                 echo "Repository: $(git config --get remote.origin.url)"
@@ -111,7 +110,7 @@ pipeline {
         stage('Dependency Security Scan') {
             when { expression { params.RUN_SECURITY_SCAN } }
             steps {
-                echo "🔍 Scanning dependencies..."
+                echo "🔍 Running dependency scan..."
                 sh 'mvn org.owasp:dependency-check-maven:check -DskipTests || true'
             }
             post {
@@ -132,7 +131,7 @@ pipeline {
             parallel {
                 stage('Compile') {
                     steps {
-                        echo "🔨 Compiling..."
+                        echo "🔨 Compiling source..."
                         sh 'mvn clean compile -DskipTests'
                     }
                 }
@@ -153,7 +152,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                echo "📊 Running SonarQube analysis..."
+                echo "📊 Running SonarQube code analysis..."
                 withSonarQubeEnv('Sonar-Server') {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                         sh """
@@ -173,7 +172,7 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                echo "🚦 Checking SonarQube Quality Gate..."
+                echo "🚦 Waiting for SonarQube Quality Gate..."
                 timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -183,17 +182,20 @@ pipeline {
 
         stage('Package & Docker Build') {
             steps {
-                echo "📦 Packaging and building Docker image..."
                 script {
+                    echo "📦 Building Docker image..."
                     sh 'mvn package -DskipTests'
                     archiveArtifacts 'target/*.jar'
+
                     withCredentials([usernamePassword(credentialsId: 'docker-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                     }
+
                     sh """
                     docker build -t ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} .
                     docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
                     """
+
                     if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
                         sh "docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}"
                     }
@@ -226,21 +228,23 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                echo "📤 Pushing Docker images to registry..."
-                sh """
-                docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
-                docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
-                """
-                if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
-                    sh "docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}"
+                script {
+                    echo "📤 Pushing Docker images..."
+                    sh """
+                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
+                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
+                    """
+                    if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
+                        sh "docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}"
+                    }
                 }
             }
         }
 
         stage('Kubernetes Deployment') {
             steps {
-                echo "🎯 Deploying to Kubernetes..."
                 script {
+                    echo "🎯 Deploying to Kubernetes..."
                     sh """
                     kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
                     kubectl apply -f k8s/mysql-secret.yaml -n ${K8S_NAMESPACE} || true
@@ -250,7 +254,7 @@ pipeline {
                     """
 
                     if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
-                        echo "🚀 Blue-Green deploying to ${NEXT_DEPLOYMENT}..."
+                        echo "🚀 Deploying new version to ${NEXT_DEPLOYMENT}..."
                         sh """
                         sed -e "s|hotel-booking-blue|hotel-booking-${NEXT_DEPLOYMENT}|g" \
                             -e "s|version: blue|version: ${NEXT_DEPLOYMENT}|g" \
@@ -275,11 +279,13 @@ pipeline {
 
         stage('Post-Deployment Validation') {
             steps {
-                echo "🔍 Validating application health..."
-                sh """
-                kubectl get pods -n ${K8S_NAMESPACE}
-                kubectl get services -n ${K8S_NAMESPACE}
-                """
+                script {
+                    echo "🔍 Validating deployment..."
+                    sh """
+                    kubectl get pods -n ${K8S_NAMESPACE}
+                    kubectl get services -n ${K8S_NAMESPACE}
+                    """
+                }
             }
         }
     }
@@ -291,12 +297,12 @@ pipeline {
         }
 
         success {
-            echo "🎉 SUCCESS: Build and Deployment completed!"
+            echo "🎉 SUCCESS: Build and deployment completed successfully!"
         }
 
         failure {
-            echo "❌ Pipeline failed!"
             script {
+                echo "❌ Pipeline failed!"
                 if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
                     sh """
                     kubectl scale deployment/hotel-booking-${NEXT_DEPLOYMENT} -n ${K8S_NAMESPACE} --replicas=0 || true

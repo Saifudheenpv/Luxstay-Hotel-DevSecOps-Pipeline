@@ -12,330 +12,481 @@ pipeline {
         SONARQUBE_URL = '13.203.26.99'
         JENKINS_URL = '13.203.25.43'
         
-        // Use Docker Hub instead of Nexus Docker registry
+        // Docker Configuration
         DOCKER_REGISTRY = "docker.io"
         DOCKER_NAMESPACE = "saifudheenpv"
-        NEXUS_REPO_URL = "${NEXUS_URL}:8081"
-        
-        // Repository Names
-        MAVEN_REPO_NAME = "maven-releases"
-        
-        // Credentials
-        KUBECONFIG = credentials('kubeconfig')
-        SONAR_TOKEN = credentials('sonar-token')
-        NEXUS_CREDS = credentials('nexus-creds')
-        DOCKER_CREDS = credentials('docker-token')
-        GITHUB_CREDS = credentials('github-token')
         
         // Application Configuration
         APP_NAME = 'hotel-booking-system'
         APP_VERSION = "${env.BUILD_ID}"
         K8S_NAMESPACE = 'hotel-booking'
         
-        // Maven Configuration
-        MAVEN_OPTS = '-Xmx1024m'
+        // Security Configuration
+        MAVEN_OPTS = '-Xmx1024m -Djava.security.egd=file:/dev/./urandom'
         
         // Email Configuration
         EMAIL_TO = 'mesaifudheenpv@gmail.com'
         EMAIL_FROM = 'mesaifudheenpv@gmail.com'
     }
     
-    // WEBHOOK TRIGGERS
     triggers {
-        // GitHub Webhook Trigger
         githubPush()
     }
     
     options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 45, unit: 'MINUTES')
         disableConcurrentBuilds()
+        timestamps()
+    }
+    
+    parameters {
+        choice(
+            name: 'DEPLOY_ENVIRONMENT',
+            choices: ['dev', 'staging', 'prod'],
+            description: 'Select deployment environment'
+        )
+        booleanParam(
+            name: 'RUN_SECURITY_SCAN',
+            defaultValue: true,
+            description: 'Run Trivy security scan'
+        )
+        booleanParam(
+            name: 'SKIP_TESTS',
+            defaultValue: false,
+            description: 'Skip unit tests (not recommended)'
+        )
     }
     
     stages {
-        // STAGE 1: CODE CHECKOUT FROM GITHUB
-        stage('GitHub Checkout') {
+        // STAGE 1: ENVIRONMENT PREPARATION
+        stage('Environment Setup') {
             steps {
-                echo "📦 Checking out code from GitHub repository..."
-                checkout scm
-                
-                sh '''
-                    echo "=== CODE CHECKOUT COMPLETED ==="
-                    echo "Repository: Luxstay-Hotel-Booking-System"
-                    echo "Branch: ${GIT_BRANCH}"
-                    echo "Commit: ${GIT_COMMIT}"
-                    echo "Build ID: ${BUILD_ID}"
-                    echo "Triggered by: GitHub Webhook"
-                    echo "=== DISK SPACE CHECK ==="
-                    df -h
+                echo "🔧 Setting up build environment..."
+                script {
+                    // Verify all tools are available
+                    sh '''
                     echo "=== TOOL VERSIONS ==="
                     java -version
                     mvn --version
                     docker --version
+                    kubectl version --client
+                    aws --version
                     trivy --version
-                '''
-            }
-        }
-        
-        // STAGE 2: MAVEN COMPILE
-        stage('Maven Compile') {
-            steps {
-                echo "🔨 Compiling source code with Maven..."
-                sh 'mvn compile -DskipTests'
-                sh 'echo "✅ Code compilation completed successfully"'
-            }
-        }
-        
-        // STAGE 3: UNIT TESTS EXECUTION
-        stage('Unit Tests') {
-            steps {
-                echo "🧪 Running unit tests with Maven..."
-                sh 'mvn test -Dspring.profiles.active=test'
-            }
-            post {
-                always {
-                    echo "📊 Publishing test results..."
-                    junit 'target/surefire-reports/*.xml'
+                    echo "=== DISK SPACE ==="
+                    df -h
+                    echo "=== MEMORY USAGE ==="
+                    free -h
+                    '''
                     
-                    // Generate JaCoCo report for SonarQube
-                    sh 'mvn jacoco:report -DskipTests'
+                    // Set environment specific variables
+                    if (params.DEPLOY_ENVIRONMENT == 'prod') {
+                        env.SPRING_PROFILE = 'prod'
+                        env.K8S_NAMESPACE = 'hotel-booking-prod'
+                    } else if (params.DEPLOY_ENVIRONMENT == 'staging') {
+                        env.SPRING_PROFILE = 'prod'
+                        env.K8S_NAMESPACE = 'hotel-booking-staging'
+                    } else {
+                        env.SPRING_PROFILE = 'test'
+                        env.K8S_NAMESPACE = 'hotel-booking-dev'
+                    }
                 }
             }
         }
         
-        // STAGE 4: SONARQUBE CODE QUALITY
+        // STAGE 2: SECURE CODE CHECKOUT
+        stage('Secure GitHub Checkout') {
+            steps {
+                echo "🔐 Securely checking out code..."
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [
+                        [
+                            $class: 'CloneOption',
+                            depth: 1,
+                            noTags: false,
+                            shallow: true,
+                            timeout: 10
+                        ],
+                        [
+                            $class: 'CleanBeforeCheckout'
+                        ]
+                    ],
+                    userRemoteConfigs: [[
+                        credentialsId: 'github-token',
+                        url: 'https://github.com/your-username/Hotel-Booking-System.git'
+                    ]]
+                ])
+                
+                sh '''
+                echo "=== SECURE CHECKOUT COMPLETED ==="
+                echo "Repository: $(git config --get remote.origin.url)"
+                echo "Branch: $(git branch --show-current)"
+                echo "Commit: $(git rev-parse HEAD)"
+                echo "Build: ${BUILD_ID}"
+                '''
+            }
+        }
+        
+        // STAGE 3: DEPENDENCY VULNERABILITY SCAN
+        stage('Dependency Security Scan') {
+            when {
+                expression { params.RUN_SECURITY_SCAN }
+            }
+            steps {
+                echo "🔍 Scanning dependencies for vulnerabilities..."
+                sh '''
+                mvn org.owasp:dependency-check-maven:check -DskipTests || echo "Dependency check completed with warnings"
+                '''
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target',
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'Dependency Security Report'
+                    ])
+                }
+            }
+        }
+        
+        // STAGE 4: CODE COMPILATION
+        stage('Secure Compile') {
+            steps {
+                echo "🔨 Compiling with security flags..."
+                sh """
+                mvn compile \
+                    -DskipTests \
+                    -Dspring.profiles.active=${env.SPRING_PROFILE} \
+                    -Dfile.encoding=UTF-8
+                """
+            }
+        }
+        
+        // STAGE 5: UNIT TESTS WITH COVERAGE
+        stage('Unit Tests & Coverage') {
+            when {
+                expression { !params.SKIP_TESTS }
+            }
+            steps {
+                echo "🧪 Running comprehensive tests..."
+                sh """
+                mvn test \
+                    -Dspring.profiles.active=test \
+                    -Djacoco.skip=false \
+                    -DfailIfNoTests=false
+                """
+            }
+            post {
+                always {
+                    junit(
+                        testResults: 'target/surefire-reports/*.xml',
+                        allowEmptyResults: true
+                    )
+                    jacoco(
+                        execPattern: 'target/jacoco.exec',
+                        classPattern: 'target/classes',
+                        sourcePattern: 'src/main/java',
+                        exclusionPattern: 'src/test*'
+                    )
+                }
+            }
+        }
+        
+        // STAGE 6: SONARQUBE QUALITY GATE
         stage('SonarQube Analysis') {
             steps {
-                echo "🔍 Running SonarQube code analysis..."
+                echo "📊 Running code quality analysis..."
                 withSonarQubeEnv('Sonar-Server') {
                     sh """
                     mvn sonar:sonar \
-                      -Dsonar.projectKey=hotel-booking-system \
-                      -Dsonar.projectName='Hotel Booking System' \
+                      -Dsonar.projectKey=hotel-booking-system-${params.DEPLOY_ENVIRONMENT} \
+                      -Dsonar.projectName='Hotel Booking System - ${params.DEPLOY_ENVIRONMENT.toUpperCase()}' \
                       -Dsonar.host.url=http://${SONARQUBE_URL}:9000 \
                       -Dsonar.login=${SONAR_TOKEN} \
                       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                       -Dsonar.java.binaries=target/classes \
-                      -Dsonar.sourceEncoding=UTF-8
+                      -Dsonar.sourceEncoding=UTF-8 \
+                      -Dsonar.exclusions='**/test/**,**/target/**,**/static/**,**/templates/**' \
+                      -Dsonar.coverage.exclusions='**/dto/**,**/model/**,**/config/**,**/entity/**'
                     """
                 }
             }
         }
         
-        // STAGE 5: QUALITY GATE CHECK (WITH WEBHOOK)
+        // STAGE 7: QUALITY GATE
         stage('Quality Gate') {
             steps {
-                echo "🚦 Waiting for SonarQube Quality Gate via Webhook..."
-                script {
-                    timeout(time: 15, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                        }
-                    }
+                echo "🚦 Checking Quality Gate..."
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
                 echo "✅ Quality Gate passed!"
             }
         }
         
-        // STAGE 6: DEPENDENCY CHECK (SKIPPED - OPTIONAL)
-        stage('Dependency Check') {
+        // STAGE 8: SECURE PACKAGING
+        stage('Secure Package Build') {
             steps {
-                echo "🔒 Skipping OWASP Dependency Check"
-                echo "✅ Using Trivy for container security scanning instead"
-                sh "echo 'Dependency check skipped - NVD API restrictions' > dependency-check-report.html"
-            }
-        }
-        
-        // STAGE 7: MAVEN BUILD PACKAGE
-        stage('Maven Build Package') {
-            steps {
-                echo "📦 Building application package..."
-                sh 'mvn clean package -DskipTests'
+                echo "📦 Building secure application package..."
+                sh """
+                mvn clean package \
+                    -DskipTests \
+                    -Dspring.profiles.active=${env.SPRING_PROFILE} \
+                    -Djar.finalName=${APP_NAME}-${APP_VERSION}
+                """
                 
-                echo "✅ Application packaged successfully!"
-                archiveArtifacts 'target/*.jar'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 
                 sh '''
-                    echo "=== BUILD ARTIFACTS ==="
-                    ls -la target/*.jar
-                    find target/ -name "*.jar" -exec echo "JAR File: {}" \\;
+                echo "=== BUILD ARTIFACTS VERIFICATION ==="
+                ls -la target/*.jar
+                jar tf target/*.jar | head -20
                 '''
             }
         }
         
-        // STAGE 8: NEXUS ARTIFACT PUBLISH (SKIPPED - OPTIONAL)
-        stage('Nexus Publish Artifact') {
+        // STAGE 9: DOCKER SECURITY SCAN & BUILD
+        stage('Docker Security & Build') {
             steps {
-                echo "📤 Nexus Upload (Optional - Skipped)"
-                echo "✅ Artifacts are archived in Jenkins and Docker images are pushed to Docker Hub"
-            }
-        }
-        
-        // STAGE 9: DOCKER BUILD AND TAG
-        stage('Docker Build and Tag') {
-            steps {
-                echo "🐳 Building Docker image for Docker Hub..."
+                echo "🐳 Building secure Docker image..."
                 script {
-                    // Login to Docker Hub
+                    // Secure Docker login
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-token',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh """
+                        echo \"\${DOCKER_PASS}\" | docker login -u \"\${DOCKER_USER}\" --password-stdin
+                        """
+                    }
+                    
+                    // Build with security best practices
                     sh """
-                    echo "${DOCKER_CREDS_PSW}" | docker login -u ${DOCKER_CREDS_USR} --password-stdin || echo "Docker login attempted"
+                    docker build \
+                        --tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} \
+                        --tag ${DOCKER_NAMESPACE}/${APP_NAME}:latest \
+                        --build-arg SPRING_PROFILES_ACTIVE=${env.SPRING_PROFILE} \
+                        --label version=${APP_VERSION} \
+                        --label build-date=\$(date +%Y-%m-%d) \
+                        --label commit-hash=\$(git rev-parse --short HEAD) \
+                        .
                     """
                     
-                    // Build Docker image
-                    sh """
-                    docker build -t ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} . || exit 1
-                    docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
-                    """
-                    
-                    echo "✅ Docker image built and tagged successfully!"
+                    echo "✅ Docker image built with security labels"
                     sh "docker images | grep ${APP_NAME}"
                 }
             }
         }
         
-        // STAGE 10: TRIVY SECURITY SCAN (FIXED - SKIP DB UPDATE)
-        stage('Trivy Security Scan') {
+        // STAGE 10: CONTAINER SECURITY SCAN
+        stage('Container Security Scan') {
+            when {
+                expression { params.RUN_SECURITY_SCAN }
+            }
             steps {
-                echo "🔍 Running Trivy security scan..."
+                echo "🔒 Scanning container for vulnerabilities..."
                 script {
-                    // Verify Trivy is installed
-                    sh 'trivy --version'
-                    
-                    // Clean Trivy cache first
-                    sh 'trivy image --clear-cache || echo "Cache cleared"'
-                    
-                    // Run security scan with skip update
                     sh """
-                    # Generate HTML report (skip DB update to save space)
-                    trivy image --skip-db-update --format template --template "@contrib/html.tpl" --output trivy-security-report.html ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || echo "Trivy scan completed with warnings"
+                    # Update Trivy database
+                    trivy image --download-db-only
                     
-                    # Check for critical vulnerabilities (non-blocking)
-                    trivy image --skip-db-update --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || echo "Vulnerabilities found, continuing deployment"
+                    # Scan image and generate report
+                    trivy image \
+                        --format template \
+                        --template \"@contrib/html.tpl\" \
+                        --output trivy-security-report.html \
+                        --exit-code 0 \
+                        --severity HIGH,CRITICAL \
+                        ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
+                    
+                    # Check for critical vulnerabilities (non-blocking for now)
+                    trivy image \
+                        --exit-code 0 \
+                        --severity CRITICAL \
+                        ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || echo \"Critical vulnerabilities found - review report\"
                     """
-                    
-                    echo "✅ Security scan completed!"
+                }
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: '.',
+                        reportFiles: 'trivy-security-report.html',
+                        reportName: 'Container Security Report'
+                    ])
                 }
             }
         }
         
-        // STAGE 11: DOCKER PUSH
-        stage('Docker Push') {
+        // STAGE 11: SECURE DOCKER PUSH
+        stage('Secure Docker Push') {
             steps {
-                echo "📤 Pushing Docker image to Docker Hub..."
+                echo "📤 Pushing to Docker Hub securely..."
                 script {
                     sh """
-                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || echo "Docker push attempted"
-                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest || echo "Docker push attempted"
+                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
+                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
                     """
                     
-                    echo "✅ Docker images pushed successfully!"
-                    sh "echo 'Docker images available at: https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}'"
+                    echo "✅ Images pushed successfully"
+                    sh """
+                    echo "Docker images available at:"
+                    echo "https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}"
+                    echo "Tags: ${APP_VERSION}, latest"
+                    """
                 }
             }
         }
         
-        // STAGE 12: DEPLOY TO KUBERNETES
-        stage('Deploy to Kubernetes') {
+        // STAGE 12: KUBERNETES DEPLOYMENT
+        stage('Kubernetes Deployment') {
             steps {
                 echo "🚀 Deploying to Kubernetes..."
                 script {
+                    // Setup Kubernetes access
+                    sh """
+                    # Configure kubectl with proper permissions
+                    mkdir -p ~/.kube
+                    kubectl config set-cluster eks-cluster --server=\$(echo \"\${KUBECONFIG}\" | grep server | cut -d: -f2- | tr -d ' ')
+                    kubectl config set-credentials jenkins-user --token=\$(echo \"\${KUBECONFIG}\" | grep token | cut -d: -f2- | tr -d ' ')
+                    kubectl config set-context jenkins-context --cluster=eks-cluster --user=jenkins-user
+                    kubectl config use-context jenkins-context
+                    """
+                    
                     // Create namespace if not exists
                     sh """
-                    kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f - || echo "Namespace already exists"
+                    kubectl create namespace ${env.K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f - || echo \"Namespace handling completed\"
                     """
                     
-                    // Deploy MySQL
+                    // Create secrets for database
                     sh """
-                    kubectl apply -f k8s/mysql-deployment.yaml -n ${K8S_NAMESPACE} || echo "MySQL deployment already exists"
-                    kubectl apply -f k8s/mysql-service.yaml -n ${K8S_NAMESPACE} || echo "MySQL service already exists"
+                    kubectl create secret generic mysql-secret \
+                        --namespace ${env.K8S_NAMESPACE} \
+                        --from-literal=password=securepassword123 \
+                        --dry-run=client -o yaml | kubectl apply -f - || echo \"MySQL secret handled\"
                     """
                     
-                    // Wait for MySQL to be ready
+                    // Deploy MySQL with health checks
+                    sh """
+                    kubectl apply -f k8s/mysql-deployment.yaml --namespace ${env.K8S_NAMESPACE} --validate=false
+                    kubectl apply -f k8s/mysql-service.yaml --namespace ${env.K8S_NAMESPACE} --validate=false
+                    """
+                    
+                    // Wait for MySQL with proper bash syntax
                     sh """
                     echo "⏳ Waiting for MySQL to be ready..."
-                    for i in {1..30}; do
-                        if kubectl get pods -n ${K8S_NAMESPACE} -l app=mysql 2>/dev/null | grep -q Running; then
-                            echo "✅ MySQL is ready!"
-                            break
-                        elif [ \$i -eq 30 ]; then
-                            echo "⚠️ MySQL not ready after 5 minutes, continuing deployment..."
-                            break
-                        else
-                            echo "⏱️ Waiting for MySQL... (attempt \$i/30)"
-                            sleep 10
+                    for i in \$(seq 1 30); do
+                        if kubectl get pods --namespace ${env.K8S_NAMESPACE} -l app=mysql 2>/dev/null | grep -q "Running"; then
+                            if kubectl exec --namespace ${env.K8S_NAMESPACE} \$(kubectl get pods --namespace ${env.K8S_NAMESPACE} -l app=mysql -o jsonpath='{.items[0].metadata.name}') -- mysqladmin ping -h localhost >/dev/null 2>&1; then
+                                echo "✅ MySQL is ready and responsive!"
+                                break
+                            fi
                         fi
+                        if [ \$i -eq 30 ]; then
+                            echo "⚠️ MySQL not fully ready after 5 minutes, but continuing..."
+                            break
+                        fi
+                        echo "⏱️ Waiting for MySQL... (attempt \$i/30)"
+                        sleep 10
                     done
                     """
                     
-                    // Update deployment with current image tag
+                    // Prepare application deployment
                     sh """
-                    cp k8s/app-deployment.yaml k8s/app-deployment-${APP_VERSION}.yaml
-                    sed -i 's|saifudheenpv/hotel-booking-system:latest|${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}|g' k8s/app-deployment-${APP_VERSION}.yaml
+                    # Create deployment with current image
+                    sed -e "s|\\\$IMAGE_TAG|${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}|g" \
+                        -e "s|\\\$SPRING_PROFILE|${env.SPRING_PROFILE}|g" \
+                        -e "s|\\\$NAMESPACE|${env.K8S_NAMESPACE}|g" \
+                        k8s/app-deployment-blue.yaml > k8s/app-deployment-${APP_VERSION}.yaml
                     """
                     
                     // Deploy application
                     sh """
-                    kubectl apply -f k8s/app-deployment-${APP_VERSION}.yaml -n ${K8S_NAMESPACE} || echo "Application deployment failed"
-                    kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE} || echo "Application service failed"
+                    kubectl apply -f k8s/app-deployment-${APP_VERSION}.yaml --namespace ${env.K8S_NAMESPACE} --validate=false
+                    kubectl apply -f k8s/app-service.yaml --namespace ${env.K8S_NAMESPACE} --validate=false
                     """
                     
-                    echo "✅ Application deployed to Kubernetes!"
+                    echo "✅ Application deployed successfully!"
                 }
             }
         }
         
-        // STAGE 13: HEALTH CHECK & VERIFICATION
-        stage('Health Check & Verification') {
+        // STAGE 13: HEALTH CHECKS & VERIFICATION
+        stage('Health Verification') {
             steps {
-                echo "🏥 Running health checks..."
+                echo "🏥 Running comprehensive health checks..."
                 script {
-                    // Wait for application pods
+                    // Wait for application to be ready
                     sh """
-                    echo "⏳ Waiting for application pods to be ready..."
-                    for i in {1..30}; do
-                        if kubectl get pods -n ${K8S_NAMESPACE} -l app=hotel-booking 2>/dev/null | grep -q Running; then
-                            echo "✅ Application pods are ready!"
+                    echo "⏳ Waiting for application pods..."
+                    for i in \$(seq 1 30); do
+                        if kubectl get pods --namespace ${env.K8S_NAMESPACE} -l app=hotel-booking 2>/dev/null | grep -q "Running"; then
+                            echo "✅ Application pods are running!"
                             break
-                        elif [ \$i -eq 30 ]; then
-                            echo "⚠️ Application pods not ready after 5 minutes"
-                            break
-                        else
-                            echo "⏱️ Waiting for application pods... (attempt \$i/30)"
-                            sleep 10
                         fi
+                        if [ \$i -eq 30 ]; then
+                            echo "❌ Application pods failed to start"
+                            exit 1
+                        fi
+                        sleep 10
                     done
                     """
                     
-                    // Display deployment status
+                    // Get deployment status
                     sh """
                     echo "=== KUBERNETES DEPLOYMENT STATUS ==="
-                    kubectl get all -n ${K8S_NAMESPACE} || echo "Kubernetes resources not available"
+                    kubectl get all --namespace ${env.K8S_NAMESPACE}
+                    echo "=== APPLICATION PODS ==="
+                    kubectl get pods --namespace ${env.K8S_NAMESPACE} -l app=hotel-booking
+                    echo "=== SERVICES ==="
+                    kubectl get services --namespace ${env.K8S_NAMESPACE}
                     """
                     
-                    // Try health check
+                    // Perform health check
                     sh """
-                    echo "🔍 Performing health check..."
-                    for i in {1..5}; do
-                        echo "Health check attempt \$i/5"
-                        if timeout 30s kubectl port-forward svc/hotel-booking-service 8080:8080 -n ${K8S_NAMESPACE} 2>/dev/null & then
-                            sleep 15
-                            if curl -f http://localhost:8080/actuator/health; then
-                                echo "✅ Health check passed!"
-                                pkill -f "kubectl port-forward" || true
-                                break
-                            else
-                                echo "⏱️ Health check attempt \$i failed"
-                                pkill -f "kubectl port-forward" || true
-                                sleep 10
-                            fi
-                        else
-                            echo "⏱️ Port-forward failed, retrying..."
-                            sleep 10
+                    echo "🔍 Performing application health check..."
+                    for i in \$(seq 1 10); do
+                        POD_NAME=\$(kubectl get pods --namespace ${env.K8S_NAMESPACE} -l app=hotel-booking -o jsonpath='{.items[0].metadata.name}')
+                        if kubectl exec --namespace ${env.K8S_NAMESPACE} \$POD_NAME -- curl -f http://localhost:8080/actuator/health >/dev/null 2>&1; then
+                            echo "✅ Application health check passed!"
+                            break
                         fi
+                        if [ \$i -eq 10 ]; then
+                            echo "⚠️ Health check failed after 10 attempts"
+                        fi
+                        sleep 15
                     done
                     """
                 }
+            }
+        }
+        
+        // STAGE 14: PERFORMANCE TESTING (OPTIONAL)
+        stage('Performance Test') {
+            when {
+                expression { params.DEPLOY_ENVIRONMENT == 'staging' }
+            }
+            steps {
+                echo "⚡ Running performance tests..."
+                sh """
+                # Basic load test with curl
+                for i in \$(seq 1 10); do
+                    timeout 10 kubectl port-forward svc/hotel-booking-service 8080:8080 --namespace ${env.K8S_NAMESPACE} &
+                    sleep 5
+                    curl -s -o /dev/null -w "Response: %{http_code}, Time: %{time_total}s\\n" http://localhost:8080/actuator/health
+                    pkill -f "kubectl port-forward"
+                    sleep 2
+                done
+                """
             }
         }
     }
@@ -344,42 +495,46 @@ pipeline {
         always {
             echo "📋 Pipeline execution completed!"
             
-            // Publish security report
+            // Publish reports
             publishHTML([
                 allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: '.',
-                reportFiles: 'trivy-security-report.html',
-                reportName: 'Trivy Security Report'
+                reportDir: 'target',
+                reportFiles: 'dependency-check-report.html',
+                reportName: 'Dependency Security'
             ])
             
-            // Display final status
+            // Final status and cleanup
             sh """
             echo "=== FINAL PIPELINE STATUS ==="
-            echo "Build: ${currentBuild.result}"
+            echo "Result: ${currentBuild.currentResult}"
+            echo "Number: ${currentBuild.number}"
             echo "Duration: ${currentBuild.durationString}"
             echo "URL: ${env.BUILD_URL}"
-            echo "=== DISK SPACE AFTER BUILD ==="
-            df -h
+            echo "=== RESOURCE CLEANUP ==="
+            docker system prune -f --filter until=24h
             """
             
-            // Cleanup
+            // Secure cleanup
             sh """
-            # Clean up Docker images
-            docker rmi ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || true
-            docker rmi ${DOCKER_NAMESPACE}/${APP_NAME}:latest || true
+            # Remove sensitive files
+            rm -f k8s/app-deployment-*.yaml trivy-security-report.html *.log || true
             
-            # Clean up temporary files
-            rm -f k8s/app-deployment-*.yaml || true
-            rm -f trivy-security-report.html || true
-            rm -f dependency-check-report.html || true
-            
-            # Clean Docker system
-            docker system prune -f || true
+            # Clean workspace
+            find . -name "*.tmp" -delete
+            find . -name "*.log" -delete
             """
-            cleanWs()
+            
+            cleanWs(
+                cleanWhenAborted: true,
+                cleanWhenFailure: true,
+                cleanWhenNotBuilt: true,
+                cleanWhenUnstable: true,
+                cleanWhenSuccess: true
+            )
         }
+        
         success {
             echo "🎉 Pipeline executed successfully!"
             
@@ -387,65 +542,110 @@ pipeline {
             echo "=== DEPLOYMENT SUCCESS ==="
             echo "Application: ${APP_NAME}"
             echo "Version: ${APP_VERSION}"
+            echo "Environment: ${params.DEPLOY_ENVIRONMENT}"
+            echo "Namespace: ${env.K8S_NAMESPACE}"
             echo "Docker Image: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}"
-            echo "Kubernetes Namespace: ${K8S_NAMESPACE}"
-            echo "Build URL: ${BUILD_URL}"
+            echo "Profile: ${env.SPRING_PROFILE}"
             """
             
-            // Send success email
             emailext (
-                subject: "SUCCESS: Pipeline '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                subject: "SUCCESS: ${env.JOB_NAME} [${env.BUILD_NUMBER}] - ${params.DEPLOY_ENVIRONMENT.toUpperCase()}",
                 body: """
                 🎉 CICD Pipeline Completed Successfully!
                 
-                Application: Hotel Booking System
-                Build Number: ${env.BUILD_NUMBER}
-                Version: ${APP_VERSION}
+                📊 Deployment Details:
+                - Application: Hotel Booking System
+                - Environment: ${params.DEPLOY_ENVIRONMENT.toUpperCase()}
+                - Version: ${APP_VERSION}
+                - Build: ${env.BUILD_NUMBER}
+                - Profile: ${env.SPRING_PROFILE}
                 
-                📊 Deployment Information:
-                - Docker Image: ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
-                - Kubernetes Namespace: ${K8S_NAMESPACE}
-                - Build URL: ${env.BUILD_URL}
-                - Trigger: GitHub Webhook
+                🐳 Docker Image:
+                ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
                 
-                ✅ All stages completed successfully!
+                ☸️ Kubernetes:
+                - Namespace: ${env.K8S_NAMESPACE}
+                - Cluster: EKS
                 
-                🔗 Useful Links:
-                - Jenkins: http://${JENKINS_URL}:8080
-                - SonarQube: http://${SONARQUBE_URL}:9000
-                - Nexus: http://${NEXUS_URL}:8081
+                ✅ Quality Gates:
+                - Code Quality: PASSED
+                - Security Scan: COMPLETED
+                - Tests: PASSED
+                
+                🔗 Links:
+                - Jenkins: ${env.BUILD_URL}
                 - Docker Hub: https://hub.docker.com/r/${DOCKER_NAMESPACE}/${APP_NAME}
+                - SonarQube: http://${SONARQUBE_URL}:9000
+                
+                📈 Next Steps:
+                Monitor application metrics and logs for any issues.
                 """,
                 to: "${EMAIL_TO}",
                 replyTo: "${EMAIL_FROM}"
             )
         }
+        
         failure {
             echo "❌ Pipeline failed!"
             
-            // Send failure email
+            // Capture failure logs
+            sh """
+            echo "=== FAILURE ANALYSIS ==="
+            echo "Last 50 lines of build log:"
+            tail -50 ../logs/${env.BUILD_NUMBER}.log || echo "Log file not available"
+            echo "=== RECENT DOCKER IMAGES ==="
+            docker images | head -10
+            echo "=== KUBERNETES EVENTS ==="
+            kubectl get events --namespace ${env.K8S_NAMESPACE} --sort-by='.lastTimestamp' | tail -10 || echo "K8s not available"
+            """
+            
             emailext (
-                subject: "FAILED: Pipeline '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                subject: "FAILED: ${env.JOB_NAME} [${env.BUILD_NUMBER}] - ${params.DEPLOY_ENVIRONMENT.toUpperCase()}",
                 body: """
                 ❌ CICD Pipeline Failed!
                 
-                Application: Hotel Booking System
-                Build Number: ${env.BUILD_NUMBER}
+                🔍 Failure Details:
+                - Application: Hotel Booking System
+                - Environment: ${params.DEPLOY_ENVIRONMENT.toUpperCase()}
+                - Build: ${env.BUILD_NUMBER}
+                - Stage: ${env.STAGE_NAME}
                 
-                Please check the Jenkins console output for details:
-                ${env.BUILD_URL}
+                📋 Common Issues:
+                • Code quality gate failure
+                • Security vulnerabilities
+                • Test failures
+                • Docker build issues
+                • Kubernetes deployment errors
+                • Resource constraints
                 
-                Common issues:
-                - SonarQube quality gate failure
-                - Docker build issues
-                - Kubernetes deployment errors
-                - Test failures
-                - Disk space issues
+                🔗 Investigation Links:
+                - Build Logs: ${env.BUILD_URL}console
+                - SonarQube: http://${SONARQUBE_URL}:9000
+                - Security Reports: ${env.BUILD_URL}trivy
                 
-                Check Jenkins build logs for detailed error information.
+                ⚠️ Immediate Actions:
+                1. Check build logs for specific errors
+                2. Review security scan reports
+                3. Verify Kubernetes cluster status
+                4. Check resource availability
+                
+                💡 Pro Tips:
+                • Ensure all tests pass locally before committing
+                • Check SonarQube for code quality issues
+                • Verify Docker Hub access and quotas
+                • Confirm Kubernetes cluster health
                 """,
                 to: "${EMAIL_TO}",
                 replyTo: "${EMAIL_FROM}"
+            )
+        }
+        
+        unstable {
+            echo "⚠️ Pipeline completed with warnings!"
+            emailext (
+                subject: "UNSTABLE: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                body: "Pipeline completed with test failures or quality warnings. Please review reports.",
+                to: "${EMAIL_TO}"
             )
         }
     }

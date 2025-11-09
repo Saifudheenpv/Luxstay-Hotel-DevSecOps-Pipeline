@@ -46,7 +46,7 @@ pipeline {
         )
         booleanParam(
             name: 'AUTO_SWITCH',
-            defaultValue: false,
+            defaultValue: true,
             description: 'Automatically switch traffic after deployment'
         )
     }
@@ -59,7 +59,7 @@ pipeline {
                 script {
                     echo "🔧 Setting up build environment..."
                     env.CURRENT_DEPLOYMENT = 'blue'
-                    env.NEXT_DEPLOYMENT = 'green'
+                    env.NEXT_DEPLOYMENT = (env.CURRENT_DEPLOYMENT == 'blue') ? 'green' : 'blue'
                     env.DEPLOYMENT_TYPE = params.DEPLOYMENT_STRATEGY
 
                     sh '''
@@ -180,11 +180,8 @@ pipeline {
                     sh """
                     docker build -t ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} .
                     docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
+                    docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}
                     """
-
-                    if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
-                        sh "docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}"
-                    }
                 }
             }
         }
@@ -221,15 +218,13 @@ pipeline {
                     sh """
                     docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
                     docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
+                    docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}
                     """
-                    if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
-                        sh "docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${NEXT_DEPLOYMENT}"
-                    }
                 }
             }
         }
 
-        /* ☸️ EKS DEPLOYMENT */
+        /* ☸️ DEPLOY TO EKS */
         stage('Kubernetes Deployment') {
             steps {
                 withCredentials([
@@ -243,23 +238,32 @@ pipeline {
                         cp $KUBECONFIG_FILE $WORKSPACE/.kube/config
                         chmod 600 $WORKSPACE/.kube/config
                         export KUBECONFIG=$WORKSPACE/.kube/config
-
-                        echo "✅ Kubeconfig loaded at: $KUBECONFIG"
                         aws sts get-caller-identity
-
-                        # Refresh AWS auth token dynamically
-                        aws eks get-token --cluster-name devops-cluster --region ap-south-1 > /tmp/token.json
-                        TOKEN=$(jq -r .status.token /tmp/token.json)
-                        kubectl config set-credentials arn:aws:eks:ap-south-1:724663512594:cluster/devops-cluster --token="$TOKEN"
 
                         echo "🎯 Deploying MySQL + App resources..."
                         kubectl create namespace hotel-booking --dry-run=client -o yaml | kubectl apply -f - || true
-                        kubectl apply -f k8s/mysql-secret.yaml -n hotel-booking --validate=false || true
-                        kubectl apply -f k8s/mysql-config.yaml -n hotel-booking --validate=false || true
-                        kubectl apply -f k8s/mysql-deployment.yaml -n hotel-booking --validate=false || true
-                        kubectl apply -f k8s/mysql-service.yaml -n hotel-booking --validate=false || true
+                        kubectl apply -f k8s/mysql-deployment.yaml -n hotel-booking --validate=false
+                        kubectl apply -f k8s/mysql-service.yaml -n hotel-booking --validate=false
+
+                        echo "🚀 Deploying application resources..."
+                        kubectl apply -f k8s/app-deployment-blue.yaml -n hotel-booking --validate=false
+                        kubectl apply -f k8s/app-service.yaml -n hotel-booking --validate=false
                         '''
                     }
+                }
+            }
+        }
+
+        /* 🔁 AUTO SWITCH BLUE-GREEN */
+        stage('Blue-Green Switch') {
+            when { expression { params.AUTO_SWITCH && params.DEPLOYMENT_STRATEGY == 'blue-green' } }
+            steps {
+                script {
+                    echo "🔁 Automatically switching traffic to ${NEXT_DEPLOYMENT}..."
+                    sh '''
+                    kubectl patch service hotel-booking-service -n hotel-booking \
+                      -p "{\"spec\":{\"selector\":{\"app\":\"hotel-booking\",\"version\":\"${NEXT_DEPLOYMENT}\"}}}"
+                    '''
                 }
             }
         }
@@ -276,18 +280,9 @@ pipeline {
                         retry(3) {
                             sh '''
                             export KUBECONFIG=$WORKSPACE/.kube/config
-                            aws eks get-token --cluster-name devops-cluster --region ap-south-1 > /tmp/token.json
-                            TOKEN=$(jq -r .status.token /tmp/token.json)
-                            kubectl config set-credentials arn:aws:eks:ap-south-1:724663512594:cluster/devops-cluster --token="$TOKEN"
-
-                            echo "✅ Current Nodes:"
-                            kubectl get nodes
-
-                            echo "✅ Pods in hotel-booking namespace:"
-                            kubectl get pods -n hotel-booking
-
-                            echo "✅ Services in hotel-booking namespace:"
-                            kubectl get svc -n hotel-booking
+                            echo "✅ Nodes:"; kubectl get nodes
+                            echo "✅ Pods:"; kubectl get pods -n hotel-booking
+                            echo "✅ Services:"; kubectl get svc -n hotel-booking
                             '''
                         }
                     }
@@ -302,20 +297,16 @@ pipeline {
             echo "📋 Pipeline execution completed!"
             cleanWs()
         }
-
         success {
             echo "🎉 SUCCESS: Build and deployment completed successfully!"
         }
-
         failure {
             script {
-                echo "❌ Pipeline failed!"
-                if (params.DEPLOYMENT_STRATEGY == 'blue-green') {
-                    sh '''
-                    kubectl scale deployment/hotel-booking-green -n hotel-booking --replicas=0 || true
-                    echo "Rolled back failed deployment green"
-                    '''
-                }
+                echo "❌ Deployment failed! Rolling back..."
+                sh '''
+                kubectl patch service hotel-booking-service -n hotel-booking \
+                  -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
+                '''
             }
         }
     }

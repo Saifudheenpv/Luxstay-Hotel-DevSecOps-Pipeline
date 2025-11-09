@@ -1,0 +1,58 @@
+# k8s/app-deployment-green.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotel-booking-green
+  namespace: hotel-booking
+  labels:
+    app: hotel-booking
+    version: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hotel-booking
+      version: green
+  template:
+    metadata:
+      labels:
+        app: hotel-booking
+        version: green
+    spec:
+      containers:
+      - name: hotel-booking
+        image: saifudheenpv/hotel-booking-system:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service.hotel-booking.svc.cluster.local:3306/hotel_booking_system?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "hotel_user"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "Hotel@123"
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "false"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"

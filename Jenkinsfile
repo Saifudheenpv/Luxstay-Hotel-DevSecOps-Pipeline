@@ -60,6 +60,7 @@ pipeline {
                     echo "🔧 Setting up build environment..."
                     env.CURRENT_DEPLOYMENT = 'blue'
                     env.NEXT_DEPLOYMENT = 'green'
+                    env.DEPLOYMENT_TYPE = params.DEPLOYMENT_STRATEGY
 
                     sh '''
                     echo "=== TOOL VERSIONS ==="
@@ -236,22 +237,22 @@ pipeline {
                     file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
                 ]) {
                     script {
-                        echo "🔐 Configuring temporary kubeconfig..."
+                        echo "🔐 Setting up and authenticating to EKS..."
                         sh '''
                         mkdir -p $WORKSPACE/.kube
                         cp $KUBECONFIG_FILE $WORKSPACE/.kube/config
                         chmod 600 $WORKSPACE/.kube/config
                         export KUBECONFIG=$WORKSPACE/.kube/config
 
-                        echo "✅ Using kubeconfig at: $KUBECONFIG"
+                        echo "✅ Kubeconfig loaded at: $KUBECONFIG"
                         aws sts get-caller-identity
-                        aws eks update-kubeconfig --name devops-cluster --region ap-south-1 --kubeconfig $KUBECONFIG
-                        kubectl get nodes
-                        '''
 
-                        echo "🎯 Deploying to Kubernetes..."
-                        sh '''
-                        export KUBECONFIG=$WORKSPACE/.kube/config
+                        # Refresh AWS auth token dynamically
+                        aws eks get-token --cluster-name devops-cluster --region ap-south-1 > /tmp/token.json
+                        TOKEN=$(jq -r .status.token /tmp/token.json)
+                        kubectl config set-credentials arn:aws:eks:ap-south-1:724663512594:cluster/devops-cluster --token="$TOKEN"
+
+                        echo "🎯 Deploying MySQL + App resources..."
                         kubectl create namespace hotel-booking --dry-run=client -o yaml | kubectl apply -f - || true
                         kubectl apply -f k8s/mysql-secret.yaml -n hotel-booking --validate=false || true
                         kubectl apply -f k8s/mysql-config.yaml -n hotel-booking --validate=false || true
@@ -266,12 +267,30 @@ pipeline {
         /* 🔍 VALIDATION */
         stage('Post-Deployment Validation') {
             steps {
-                script {
-                    echo "🔍 Validating deployment..."
-                    sh '''
-                    kubectl get pods -n hotel-booking
-                    kubectl get services -n hotel-booking
-                    '''
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
+                    file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
+                ]) {
+                    script {
+                        echo "🔍 Validating Kubernetes resources..."
+                        retry(3) {
+                            sh '''
+                            export KUBECONFIG=$WORKSPACE/.kube/config
+                            aws eks get-token --cluster-name devops-cluster --region ap-south-1 > /tmp/token.json
+                            TOKEN=$(jq -r .status.token /tmp/token.json)
+                            kubectl config set-credentials arn:aws:eks:ap-south-1:724663512594:cluster/devops-cluster --token="$TOKEN"
+
+                            echo "✅ Current Nodes:"
+                            kubectl get nodes
+
+                            echo "✅ Pods in hotel-booking namespace:"
+                            kubectl get pods -n hotel-booking
+
+                            echo "✅ Services in hotel-booking namespace:"
+                            kubectl get svc -n hotel-booking
+                            '''
+                        }
+                    }
                 }
             }
         }

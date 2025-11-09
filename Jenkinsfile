@@ -60,7 +60,6 @@ pipeline {
                     echo "🔧 Setting up build environment..."
                     env.CURRENT_DEPLOYMENT = 'blue'
                     env.NEXT_DEPLOYMENT = 'green'
-                    env.DEPLOYMENT_TYPE = params.DEPLOYMENT_STRATEGY
 
                     sh '''
                     echo "=== TOOL VERSIONS ==="
@@ -241,12 +240,12 @@ pipeline {
                         sh '''
                         mkdir -p $WORKSPACE/.kube
                         cp $KUBECONFIG_FILE $WORKSPACE/.kube/config
+                        chmod 600 $WORKSPACE/.kube/config
                         export KUBECONFIG=$WORKSPACE/.kube/config
 
                         echo "✅ Using kubeconfig at: $KUBECONFIG"
                         aws sts get-caller-identity
                         aws eks update-kubeconfig --name devops-cluster --region ap-south-1 --kubeconfig $KUBECONFIG
-                        kubectl config current-context
                         kubectl get nodes
                         '''
 
@@ -259,11 +258,10 @@ pipeline {
                         kubectl apply -f k8s/mysql-deployment.yaml -n hotel-booking --validate=false || true
                         kubectl apply -f k8s/mysql-service.yaml -n hotel-booking --validate=false || true
                         '''
+                    }
+                }
             }
         }
-    }
-}
-
 
         /* 🔍 VALIDATION */
         stage('Post-Deployment Validation') {

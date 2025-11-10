@@ -20,7 +20,7 @@ pipeline {
   options {
     timestamps()
     disableConcurrentBuilds()
-    timeout(time: 60, unit: 'MINUTES')  // Increased for NLB DNS
+    timeout(time: 60, unit: 'MINUTES')  // 60 min for NLB DNS
     buildDiscarder(logRotator(numToKeepStr: '10'))
   }
 
@@ -175,7 +175,7 @@ pipeline {
                 returnStdout: true
               ).trim()
 
-              if (dns && dns =~ /elb\\.ap-south-1\\.amazonaws\\.com/) {
+              if (dns && dns =~ /elb\.ap-south-1\.amazonaws\.com/) {
                 env.APP_URL = "http://$dns"
                 echo "LIVE URL DETECTED: ${env.APP_URL}"
                 break
@@ -185,9 +185,9 @@ pipeline {
               }
             }
 
+            // 100% DYNAMIC — NO HARDCODED URL
             if (!dns || !dns.contains('elb.ap-south-1')) {
-              echo "DNS not ready. Using last known URL."
-              env.APP_URL = "http://abcccf245973c4f8c87f6a01d2d303b0-234986912.ap-south-1.elb.amazonaws.com"
+              error "NLB DNS not available after ${maxRetries * retryDelay} seconds. Check AWS Console."
             }
           }
           echo "OPEN YOUR SITE: ${env.APP_URL}"

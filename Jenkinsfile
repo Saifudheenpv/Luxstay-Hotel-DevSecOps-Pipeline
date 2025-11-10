@@ -166,16 +166,19 @@ pipeline {
 
           sh "kubectl config current-context"
           sh "kubectl get ns ${K8S_NAMESPACE}"
-          sh "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'http://NOT-READY'"
 
+          // FULL SERVICE OUTPUT IN LOG
+          sh "kubectl get svc hotel-booking-service -n hotel-booking"
+
+          // Extract URL for post
           script {
-            def dns = sh(
+            def externalIp = sh(
               script: "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'NOT-READY'",
               returnStdout: true
             ).trim()
 
-            if (dns && dns.contains('elb.ap-south-1')) {
-              env.APP_URL = "http://$dns"
+            if (externalIp && externalIp.contains('elb.amazonaws.com')) {
+              env.APP_URL = "http://$externalIp"
             } else {
               env.APP_URL = "http://NOT-READY"
             }

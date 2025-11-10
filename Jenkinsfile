@@ -20,7 +20,7 @@ pipeline {
   options {
     timestamps()
     disableConcurrentBuilds()
-    timeout(time: 45, unit: 'MINUTES')
+    timeout(time: 60, unit: 'MINUTES')  // Increased for NLB DNS
     buildDiscarder(logRotator(numToKeepStr: '10'))
   }
 
@@ -162,7 +162,7 @@ pipeline {
         ]) {
           script {
             def dns = ""
-            def maxRetries = 20
+            def maxRetries = 40  // 40 × 10s = 6.6 minutes
             def retryDelay = 10
 
             sh 'mkdir -p .kube && cp "$KUBECONFIG_FILE" .kube/config && chmod 600 .kube/config'
@@ -175,9 +175,9 @@ pipeline {
                 returnStdout: true
               ).trim()
 
-              if (dns && dns != '' && dns =~ /elb\\.ap-south-1\\.amazonaws\\.com/) {
+              if (dns && dns =~ /elb\\.ap-south-1\\.amazonaws\\.com/) {
                 env.APP_URL = "http://$dns"
-                echo "LIVE URL READY: ${env.APP_URL}"
+                echo "LIVE URL DETECTED: ${env.APP_URL}"
                 break
               } else {
                 echo "Waiting for NLB DNS... (attempt ${i + 1}/${maxRetries})"
@@ -185,9 +185,9 @@ pipeline {
               }
             }
 
-            if (!dns || dns == '' || !dns.contains('elb.ap-south-1')) {
-              env.APP_URL = "http://abcccf245973c4f8c87f6a01d2d303b0-59d0e235008406c1.elb.ap-south-1.amazonaws.com"
-              echo "Using KNOWN LIVE URL: ${env.APP_URL}"
+            if (!dns || !dns.contains('elb.ap-south-1')) {
+              echo "DNS not ready. Using last known URL."
+              env.APP_URL = "http://abcccf245973c4f8c87f6a01d2d303b0-234986912.ap-south-1.elb.amazonaws.com"
             }
           }
           echo "OPEN YOUR SITE: ${env.APP_URL}"

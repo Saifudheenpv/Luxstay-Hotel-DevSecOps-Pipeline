@@ -69,9 +69,9 @@ pipeline {
         stage('Build, Test & Security Scan') {
             steps {
                 withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-                    echo "🧪 Running build, skipping SmokeTest (port 8080 issue), and performing OWASP scan..."
+                    echo "🧪 Running Maven build + OWASP Dependency Check..."
                     sh '''
-                    mvn clean verify -Dtest=!SmokeTest -Dnvd.api.key=$NVD_API_KEY
+                    mvn clean verify -U -DskipTests=false -Dnvd.api.key=$NVD_API_KEY
                     '''
                 }
             }
@@ -180,7 +180,7 @@ pipeline {
                     file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
                 ]) {
                     script {
-                        echo "🔍 Validating EKS resources and health check..."
+                        echo "🔍 Validating EKS resources and performing health check..."
                         sh '''
                         export KUBECONFIG=$WORKSPACE/.kube/config
                         aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
@@ -189,11 +189,11 @@ pipeline {
                         kubectl get pods -n ${K8S_NAMESPACE}
                         kubectl get svc -n ${K8S_NAMESPACE}
 
-                        echo "🔎 Waiting 15 seconds before health check..."
-                        sleep 15
+                        echo "⏳ Waiting 20 seconds before health check..."
+                        sleep 20
 
-                        echo "🌐 Checking application health..."
                         APP_URL=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                        echo "🌐 Checking application health at http://$APP_URL/actuator/health"
                         curl -I http://$APP_URL/actuator/health || echo "⚠️ Health endpoint not reachable yet"
                         '''
                     }

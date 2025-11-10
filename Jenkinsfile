@@ -124,7 +124,19 @@ pipeline {
             envsubst < k8s/app-deployment-blue.yaml | kubectl apply -f - -n ${K8S_NAMESPACE}
             envsubst < k8s/app-deployment-green.yaml | kubectl apply -f - -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE}
+
+            # EXTRACT EXTERNAL-IP SILENTLY
+            EXTERNAL_IP=$(kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk '{print $4}')
+            if [[ "$EXTERNAL_IP" == *".elb.amazonaws.com"* ]]; then
+              echo "EXTERNAL_IP=$EXTERNAL_IP" > external_ip.txt
+            else
+              echo "EXTERNAL_IP=NOT-READY" > external_ip.txt
+            fi
           '''
+          script {
+            def props = readProperties file: 'external_ip.txt'
+            env.EXTERNAL_IP = props.EXTERNAL_IP
+          }
         }
       }
     }
@@ -153,55 +165,21 @@ pipeline {
         }
       }
     }
-
-    stage('Get App URL') {
-      steps {
-        withCredentials([
-          [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
-          file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
-        ]) {
-          sh 'mkdir -p .kube && cp "$KUBECONFIG_FILE" .kube/config && chmod 600 .kube/config'
-          sh 'export KUBECONFIG=.kube/config'
-          sh 'aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}'
-
-          sh "kubectl config current-context"
-          sh "kubectl get ns ${K8S_NAMESPACE}"
-
-          // ONLY THIS IN LOG
-          sh "kubectl get svc hotel-booking-service -n hotel-booking"
-
-          // EXTRACT FROM TABLE (HIDDEN)
-          script {
-            def table = sh(
-              script: "kubectl get svc hotel-booking-service -n hotel-booking --no-headers",
-              returnStdout: true
-            ).trim()
-
-            def columns = table.split()
-            def externalIp = columns[3]
-
-            env.EXTERNAL_IP = externalIp.contains('elb.amazonaws.com') ? externalIp : "NOT-READY"
-          }
-        }
-      }
-    }
   }
 
   post {
     success {
       echo "SUCCESS: Deployed v${APP_VERSION}!"
-      echo "CLUSTER: ${CLUSTER_NAME}"
-      echo "NAMESPACE: ${K8S_NAMESPACE}"
-      echo "EXTERNAL-IP: ${env.EXTERNAL_IP}"
-      cleanWs()
 
       emailext (
         to: 'mesaifudheenpv@gmail.com',
-        subject: "SUCCESS: Hotel Booking v${APP_VERSION} Live!",
+        subject: "LIVE: Hotel Booking v${APP_VERSION}",
         body: """
         Your app is LIVE!
 
         Version: v${APP_VERSION}
+        Cluster: ${CLUSTER_NAME}
+        Namespace: ${K8S_NAMESPACE}
         External IP: ${env.EXTERNAL_IP}
         Open: http://${env.EXTERNAL_IP}
 
@@ -211,7 +189,6 @@ pipeline {
     }
     failure {
       echo "FAILED: Check logs."
-      cleanWs()
 
       emailext (
         to: 'mesaifudheenpv@gmail.com',
@@ -225,7 +202,7 @@ pipeline {
       )
     }
     always {
-      echo "Pipeline finished at: ${new Date().format('yyyy-MM-dd HH:mm:ss z')}"
+      cleanWs()
     }
   }
 }

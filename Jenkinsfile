@@ -20,7 +20,7 @@ pipeline {
   options {
     timestamps()
     disableConcurrentBuilds()
-    timeout(time: 60, unit: 'MINUTES')
+    timeout(time: 30, unit: 'MINUTES')
     buildDiscarder(logRotator(numToKeepStr: '10'))
   }
 
@@ -157,27 +157,25 @@ pipeline {
     stage('Get App URL') {
       steps {
         withCredentials([
-          [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
         ]) {
           script {
             def dns = ""
-            def maxRetries = 40
-            def retryDelay = 10
+            def maxRetries = 10
+            def retryDelay = 3
 
             sh 'mkdir -p .kube && cp "$KUBECONFIG_FILE" .kube/config && chmod 600 .kube/config'
             sh 'export KUBECONFIG=.kube/config'
-            sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}"
 
             for (int i = 0; i < maxRetries; i++) {
               dns = sh(
-                script: "kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o wide | awk '/hotel-booking-service/ {print \$7}' 2>/dev/null || echo ''",
+                script: "kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo ''",
                 returnStdout: true
               ).trim()
 
               if (dns && dns =~ /elb\.ap-south-1\.amazonaws\.com/) {
                 env.APP_URL = "http://$dns"
-                echo "LIVE URL DETECTED (via EXTERNAL-IP): ${env.APP_URL}"
+                echo "LIVE URL DETECTED: ${env.APP_URL}"
                 break
               } else {
                 echo "Waiting for NLB DNS... (attempt ${i + 1}/${maxRetries})"
@@ -186,7 +184,7 @@ pipeline {
             }
 
             if (!dns || !dns.contains('elb.ap-south-1')) {
-              error "NLB DNS not available after ${maxRetries * retryDelay} seconds. Check AWS Console."
+              error "NLB DNS not available after ${maxRetries * retryDelay} seconds. Check EKS Service."
             }
           }
           echo "OPEN YOUR SITE: ${env.APP_URL}"

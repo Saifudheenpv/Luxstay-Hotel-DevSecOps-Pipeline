@@ -110,9 +110,15 @@ OWASP_EOF
 
             # Clean and compile with tests; use test profile explicitly for H2 database
             echo "Running tests with H2 in-memory database (test profile)..."
-            mvn -U -B clean verify -Dserver.port=0 -Dspring.profiles.active=test -Dnvd.api.key="$NVD_API_KEY"
+            mvn -U -B clean test -Dserver.port=0 -Dspring.profiles.active=test
             
             echo "✅ All tests passed with H2 in-memory database!"
+            
+            # Run OWASP check with Sonatype OSS Index disabled to avoid rate limiting
+            echo "Running OWASP dependency check (Sonatype OSS Index disabled)..."
+            mvn -B org.owasp:dependency-check-maven:check \
+              -Dnvd.api.key="$NVD_API_KEY" \
+              -Dsonatype.oss.index.enabled=false
           '''
         }
       }

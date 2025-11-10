@@ -88,22 +88,20 @@
         </configuration>
       </plugin>
 
-      <!-- Surefire: force random port for tests (fixes Jenkins 8080 clash) -->
+      <!-- Surefire: force random port for tests -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
           <systemPropertyVariables>
-            <!-- Make embedded server choose a free port -->
             <server.port>0</server.port>
-            <!-- If you have a @SpringBootTest, this also works well -->
             <spring.main.lazy-initialization>true</spring.main.lazy-initialization>
           </systemPropertyVariables>
         </configuration>
       </plugin>
 
-      <!-- OWASP Dependency-Check -->
+      <!-- OWASP Dependency-Check: FIXED -->
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
@@ -111,13 +109,13 @@
         <configuration>
           <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
           <failBuildOnCVSS>11</failBuildOnCVSS>
-          <cveValidForHours>72</cveValidForHours>
           <format>HTML</format>
           <outputDirectory>${project.build.directory}</outputDirectory>
           <skipSystemScope>true</skipSystemScope>
           <suppressionFile>${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
-          <!-- COMPLETELY DISABLE OSS Index and other problematic analyzers -->
-          <analyzer>
+
+          <!-- CORRECT: Use <analyzers> (plural) -->
+          <analyzers>
             <ossindex.enabled>false</ossindex.enabled>
             <retirejs.enabled>false</retirejs.enabled>
             <nodeAudit.enabled>false</nodeAudit.enabled>
@@ -128,7 +126,7 @@
             <ruby.enabled>false</ruby.enabled>
             <cocoapods.enabled>false</cocoapods.enabled>
             <swift.enabled>false</swift.enabled>
-          </analyzer>
+          </analyzers>
         </configuration>
         <executions>
           <execution>

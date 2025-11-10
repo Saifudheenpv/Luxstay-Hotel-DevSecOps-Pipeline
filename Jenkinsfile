@@ -51,10 +51,10 @@ pipeline {
       steps {
         sh '''
           find src -name "*.java" -type f -print0 | xargs -0 sed -i \
-            -e 's/import javax\\\\.persistence\\\\./import jakarta.persistence./g' \
-            -e 's/import javax\\\\.validation\\\\./import jakarta.validation./g' \
-            -e 's/import javax\\\\.servlet\\\\./import jakarta.servlet./g' \
-            -e 's/import javax\\\\.annotation\\\\./import jakarta.annotation./g'
+            -e 's/import javax\\.persistence\\./import jakarta.persistence./g' \
+            -e 's/import javax\\.validation\\./import jakarta.validation./g' \
+            -e 's/import javax\\.servlet\\./import jakarta.servlet./g' \
+            -e 's/import javax\\.annotation\\./import jakarta.annotation./g'
         '''
       }
     }
@@ -144,9 +144,10 @@ pipeline {
             kubectl wait --for=condition=ready pod -l app=hotel-booking,version=green -n ${K8S_NAMESPACE} --timeout=300s
 
             echo "Switching traffic to GREEN..."
-            kubectl patch service hotel-booking-service -n ${K8S，积极} \
+            kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
               -p '{"spec":{"selector":{"app":"hotel-booking","version":"green"}}}'
 
+            echo "Scaling BLUE to 0..."
             kubectl scale deployment hotel-booking-blue --replicas=0 -n ${K8S_NAMESPACE} || true
           '''
         }
@@ -164,7 +165,6 @@ pipeline {
             def retryDelay = 10
 
             for (int i = 0; i < maxRetries; i++) {
-              // Use AWS CLI to find NLB DNS (works even if kubectl shows nothing)
               lbDns = sh(
                 script: """
                   aws elbv2 describe-load-balancers \
@@ -184,7 +184,6 @@ pipeline {
               }
             }
 
-            // Fallback: Use known working URL
             if (!lbDns || lbDns == '') {
               env.APP_URL = "http://abcccf245973c4f8c87f6a01d2d303b0-59d0e235008406c1.elb.ap-south-1.amazonaws.com"
               echo "Using known LIVE URL: ${env.APP_URL}"
@@ -213,7 +212,7 @@ pipeline {
           export KUBECONFIG=.kube/config
           aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
           kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
-            -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
+            -p '{"spec:{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
         '''
       }
       cleanWs()

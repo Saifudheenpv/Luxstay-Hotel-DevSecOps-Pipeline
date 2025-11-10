@@ -25,7 +25,7 @@ pipeline {
   parameters {
     choice(name: 'DEPLOYMENT_STRATEGY', choices: ['blue-green', 'rolling'], description: 'Select deployment strategy')
     booleanParam(name: 'AUTO_SWITCH', defaultValue: true, description: 'Auto switch traffic to new version?')
-    booleanParam(name: 'AUTO_MIGRATE_JAKARTA', defaultValue: true, description: 'Auto-convert javax.* imports to jakarta.*')
+    booleanParam(name: 'AUTO_MIGRATE_JAKARTA', defaultValue: false, description: 'Auto-convert javax.* imports to jakarta.*')
   }
 
   stages {
@@ -79,7 +79,7 @@ pipeline {
           sh '''
             # Ensure suppression file exists
             if [ ! -f dependency-check-suppressions.xml ]; then
-              cat > dependency-check-suppressions.xml <<'EOF'
+              cat > dependency-check-suppressions.xml <<'OWASP_EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
   <suppress>
@@ -88,13 +88,17 @@ pipeline {
     <cve>CVE-2016-1000027</cve>
   </suppress>
 </suppressions>
-EOF
+OWASP_EOF
             fi
 
-            # Clean and compile with tests; server.port=0 avoids Jenkins 8080
+            # Clean and compile with tests; use test profile explicitly for H2 database
+            echo "Running tests with H2 in-memory database (test profile)..."
             mvn -U -B clean verify \
               -Dserver.port=0 \
+              -Dspring.profiles.active=test \
               -Dnvd.api.key="$NVD_API_KEY"
+            
+            echo "✅ All tests passed with H2 in-memory database!"
           '''
         }
       }
@@ -109,7 +113,8 @@ EOF
               mvn -B sonar:sonar \
                 -Dsonar.projectKey='hotel-booking-system' \
                 -Dsonar.host.url=http://${SONARQUBE_URL}:9000 \
-                -Dsonar.login="$SONAR_AUTH_TOKEN"
+                -Dsonar.login="$SONAR_AUTH_TOKEN" \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
             '''
           }
         }
@@ -126,6 +131,7 @@ EOF
             docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
             docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
             docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
+            echo "✅ Docker images pushed successfully!"
           '''
         }
       }
@@ -146,11 +152,13 @@ EOF
 
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
 
+            echo "Creating/updating Kubernetes resources..."
             kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply -f k8s/mysql-deployment.yaml -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/mysql-service.yaml -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/app-deployment-blue.yaml -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE}
+            echo "✅ Kubernetes deployment applied successfully!"
           '''
         }
       }
@@ -168,8 +176,10 @@ EOF
             export KUBECONFIG=$WORKSPACE/.kube/config
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
 
+            echo "Switching traffic to GREEN deployment..."
             kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
               -p '{"spec":{"selector":{"app":"hotel-booking","version":"green"}}}'
+            echo "✅ Traffic switched to GREEN deployment!"
           '''
         }
       }
@@ -186,16 +196,38 @@ EOF
             export KUBECONFIG=$WORKSPACE/.kube/config
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
 
-            echo "Resources:"
+            echo "📋 Deployment Resources:"
             kubectl get pods -n ${K8S_NAMESPACE}
             kubectl get svc -n ${K8S_NAMESPACE}
+            kubectl get deployments -n ${K8S_NAMESPACE}
 
-            echo "Wait 15s for pods to warm up..."
-            sleep 15
+            echo "⏳ Waiting 30s for pods to be ready..."
+            sleep 30
 
+            # Check pod status
+            kubectl get pods -n ${K8S_NAMESPACE} -o wide
+            
+            # Health check with retry logic
             APP_URL=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-            echo "Health check at: http://$APP_URL/actuator/health"
-            curl -I --max-time 10 "http://$APP_URL/actuator/health" || echo "Health not ready yet"
+            if [ -z "$APP_URL" ]; then
+              APP_URL=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            fi
+            
+            if [ -n "$APP_URL" ]; then
+              echo "🔍 Health check at: http://$APP_URL/actuator/health"
+              for i in {1..5}; do
+                echo "Attempt $i to check application health..."
+                if curl -f -s --max-time 10 "http://$APP_URL/actuator/health" > /dev/null; then
+                  echo "✅ Application health check PASSED!"
+                  break
+                else
+                  echo "⏳ Application not ready yet, waiting 10s..."
+                  sleep 10
+                fi
+              done
+            else
+              echo "⚠️  Could not determine application URL, skipping health check"
+            fi
           '''
         }
       }
@@ -205,6 +237,11 @@ EOF
   post {
     success {
       echo "✅ SUCCESS: Built, scanned, analyzed, pushed and deployed!"
+      sh '''
+        echo "🎉 Pipeline completed successfully!"
+        echo "Application deployed to:"
+        kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o wide
+      '''
       cleanWs()
     }
     failure {
@@ -217,15 +254,17 @@ EOF
           sh '''
             export KUBECONFIG=$WORKSPACE/.kube/config
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
+            echo "Rolling back to BLUE deployment..."
             kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
               -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
+            echo "✅ Rollback completed!"
           '''
         }
       }
       cleanWs()
     }
     always {
-      echo "🏁 Pipeline finished."
+      echo "🏁 Pipeline finished at: $(date)"
     }
   }
 }

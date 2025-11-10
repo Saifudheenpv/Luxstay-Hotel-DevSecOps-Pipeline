@@ -14,7 +14,7 @@ pipeline {
     K8S_NAMESPACE     = 'hotel-booking'
     REGION            = 'ap-south-1'
     CLUSTER_NAME      = 'devops-cluster'
-    APP_URL           = 'NOT-READY'
+    EXTERNAL_IP       = 'NOT-READY'
   }
 
   options {
@@ -167,23 +167,20 @@ pipeline {
           sh "kubectl config current-context"
           sh "kubectl get ns ${K8S_NAMESPACE}"
 
-          // FULL TABLE IN LOG
+          // ONLY THIS IN LOG
           sh "kubectl get svc hotel-booking-service -n hotel-booking"
 
-          // EXTRACT EXTERNAL-IP FROM TABLE (NO jsonpath IN LOG)
+          // EXTRACT FROM TABLE (HIDDEN)
           script {
-            def output = sh(
+            def table = sh(
               script: "kubectl get svc hotel-booking-service -n hotel-booking --no-headers",
               returnStdout: true
             ).trim()
 
-            def externalIp = output.split()[3]  // 4th column
+            def columns = table.split()
+            def externalIp = columns[3]
 
-            if (externalIp && externalIp.contains('elb.amazonaws.com')) {
-              env.APP_URL = externalIp
-            } else {
-              env.APP_URL = "NOT-READY"
-            }
+            env.EXTERNAL_IP = externalIp.contains('elb.amazonaws.com') ? externalIp : "NOT-READY"
           }
         }
       }
@@ -195,23 +192,37 @@ pipeline {
       echo "SUCCESS: Deployed v${APP_VERSION}!"
       echo "CLUSTER: ${CLUSTER_NAME}"
       echo "NAMESPACE: ${K8S_NAMESPACE}"
-      echo "EXTERNAL-IP: ${env.APP_URL}"
+      echo "EXTERNAL-IP: ${env.EXTERNAL_IP}"
       cleanWs()
+
+      emailext (
+        to: 'mesaifudheenpv@gmail.com',
+        subject: "SUCCESS: Hotel Booking v${APP_VERSION} Live!",
+        body: """
+        Your app is LIVE!
+
+        Version: v${APP_VERSION}
+        External IP: ${env.EXTERNAL_IP}
+        Open: http://${env.EXTERNAL_IP}
+
+        Jenkins: ${env.BUILD_URL}
+        """
+      )
     }
     failure {
-      echo "FAILED: Rolling back..."
-      withCredentials([
-        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
-        file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
-      ]) {
-        sh '''
-          export KUBECONFIG=.kube/config
-          aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
-          kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
-            -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
-        '''
-      }
+      echo "FAILED: Check logs."
       cleanWs()
+
+      emailext (
+        to: 'mesaifudheenpv@gmail.com',
+        subject: "FAILED: Hotel Booking v${APP_VERSION}",
+        body: """
+        Deployment Failed!
+
+        Job: ${env.JOB_NAME} #${env.BUILD_NUMBER}
+        Log: ${env.BUILD_URL}console
+        """
+      )
     }
     always {
       echo "Pipeline finished at: ${new Date().format('yyyy-MM-dd HH:mm:ss z')}"

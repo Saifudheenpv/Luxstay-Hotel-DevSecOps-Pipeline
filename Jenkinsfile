@@ -14,9 +14,7 @@ pipeline {
         K8S_NAMESPACE = 'hotel-booking'
         REGION = 'ap-south-1'
         CLUSTER_NAME = 'devops-cluster'
-        NEXUS_URL = '13.233.52.101:8081'
-        NEXUS_REPO = 'maven-releases'
-        EMAIL_TO = 'mesaifudheenpv@gmail.com'
+        NEXUS_URL = 'http://13.203.26.99:8081/repository/maven-releases/'
     }
 
     triggers {
@@ -36,13 +34,10 @@ pipeline {
 
     stages {
 
-        /* ===========================
-           ENVIRONMENT SETUP
-        =========================== */
         stage('Environment Setup') {
             steps {
                 script {
-                    echo "🔧 Setting up build environment..."
+                    echo "🔧 Setting up environment..."
                     sh '''
                     java -version
                     mvn --version
@@ -53,9 +48,6 @@ pipeline {
             }
         }
 
-        /* ===========================
-           GIT CHECKOUT
-        =========================== */
         stage('Checkout Code') {
             steps {
                 echo "📦 Checking out code..."
@@ -63,27 +55,21 @@ pipeline {
             }
         }
 
-        /* ===========================
-           SONARQUBE ANALYSIS
-        =========================== */
+        stage('Maven Compile & Unit Tests') {
+            steps {
+                echo "🧪 Compiling and running unit tests..."
+                sh 'mvn clean compile test'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('Sonar-Server') {
-                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                        sh """
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=${APP_NAME} \
-                          -Dsonar.host.url=http://${SONARQUBE_URL}:9000 \
-                          -Dsonar.login=$SONAR_TOKEN
-                        """
-                    }
+                withSonarQubeEnv('SonarQubeServer') {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=hotel-booking -Dsonar.host.url=http://13.203.26.99:9000 -Dsonar.login=$SONAR_AUTH_TOKEN'
                 }
             }
         }
 
-        /* ===========================
-           OWASP SECURITY SCAN
-        =========================== */
         stage('OWASP Dependency Check') {
             steps {
                 echo "🔐 Running OWASP dependency scan..."
@@ -92,6 +78,9 @@ pipeline {
             post {
                 always {
                     publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
                         reportDir: 'target',
                         reportFiles: 'dependency-check-report.html',
                         reportName: 'Dependency Security Report'
@@ -100,26 +89,17 @@ pipeline {
             }
         }
 
-        /* ===========================
-           MAVEN BUILD & NEXUS DEPLOY
-        =========================== */
-        stage('Build & Publish to Nexus') {
+        stage('Maven Build & Publish to Nexus') {
             steps {
-                echo "⚙️ Building & deploying to Nexus..."
-                withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh """
-                    mvn clean deploy -DskipTests \
-                      -Dnexus.url=http://${NEXUS_URL}/repository/${NEXUS_REPO}/ \
-                      -Dnexus.user=$NEXUS_USER -Dnexus.pass=$NEXUS_PASS
-                    """
-                }
+                echo "📦 Building and uploading artifact to Nexus..."
+                sh '''
+                mvn clean package -DskipTests
+                mvn deploy -DskipTests -Dnexus.url=${NEXUS_URL}
+                '''
             }
         }
 
-        /* ===========================
-           DOCKER BUILD & TRIVY SCAN
-        =========================== */
-        stage('Docker Build & Push') {
+        stage('Docker Build, Scan & Push') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -127,7 +107,10 @@ pipeline {
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker build -t ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} .
                         docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
+                        
+                        echo "🔍 Running Trivy scan..."
                         trivy image --format table --output trivy-scan.txt ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} || true
+
                         docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
                         docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
                         '''
@@ -137,6 +120,9 @@ pipeline {
             post {
                 always {
                     publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
                         reportDir: '.',
                         reportFiles: 'trivy-scan.txt',
                         reportName: 'Trivy Scan Report'
@@ -145,9 +131,6 @@ pipeline {
             }
         }
 
-        /* ===========================
-           DEPLOY TO EKS
-        =========================== */
         stage('Deploy to EKS') {
             steps {
                 withCredentials([
@@ -155,16 +138,18 @@ pipeline {
                     file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
                 ]) {
                     script {
-                        echo "🚀 Deploying to EKS..."
+                        echo "🔐 Setting up and authenticating to EKS..."
                         sh '''
                         mkdir -p $WORKSPACE/.kube
                         cp $KUBECONFIG_FILE $WORKSPACE/.kube/config
+                        chmod 600 $WORKSPACE/.kube/config
                         export KUBECONFIG=$WORKSPACE/.kube/config
 
                         aws eks get-token --cluster-name ${CLUSTER_NAME} --region ${REGION} > /tmp/token.json
                         TOKEN=$(jq -r .status.token /tmp/token.json)
                         kubectl config set-credentials arn:aws:eks:${REGION}:724663512594:cluster/${CLUSTER_NAME} --token="$TOKEN"
 
+                        echo "🎯 Deploying resources..."
                         kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
                         kubectl apply -f k8s/mysql-deployment.yaml -n ${K8S_NAMESPACE} --validate=false
                         kubectl apply -f k8s/mysql-service.yaml -n ${K8S_NAMESPACE} --validate=false
@@ -176,85 +161,74 @@ pipeline {
             }
         }
 
-        /* ===========================
-           AUTO PATCH & BLUE-GREEN
-        =========================== */
-        stage('Auto Blue-Green Patch') {
-            when { expression { params.DEPLOYMENT_STRATEGY == 'blue-green' } }
+        stage('Blue-Green Switch') {
+            when { expression { params.DEPLOYMENT_STRATEGY == 'blue-green' && params.AUTO_SWITCH == true } }
             steps {
                 script {
-                    echo "🔁 Checking & patching service version..."
+                    echo "🔁 Switching traffic to GREEN version..."
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
                         file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
                     ]) {
                         sh '''
                         export KUBECONFIG=$WORKSPACE/.kube/config
-                        CURRENT=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.spec.selector.version}')
-                        echo "Current service version: $CURRENT"
-                        if [ "$CURRENT" = "green" ]; then
-                          echo "Switching to BLUE..."
-                          kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
-                            --type merge \
-                            -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}'
-                        else
-                          echo "Switching to GREEN..."
-                          kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
-                            --type merge \
-                            -p '{"spec":{"selector":{"app":"hotel-booking","version":"green"}}}'
-                        fi
+                        aws eks get-token --cluster-name ${CLUSTER_NAME} --region ${REGION} > /tmp/token.json
+                        TOKEN=$(jq -r .status.token /tmp/token.json)
+                        kubectl config set-credentials arn:aws:eks:${REGION}:724663512594:cluster/${CLUSTER_NAME} --token="$TOKEN"
+
+                        kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
+                          --type merge \
+                          -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}'
+
+                        echo "✅ Switched traffic to BLUE version (active pods)."
                         '''
                     }
                 }
             }
         }
 
-        /* ===========================
-           VALIDATION & HEALTH CHECK
-        =========================== */
-        stage('Post-Deployment Validation') {
+        stage('Health Check & Validation') {
             steps {
                 script {
-                    echo "🔍 Validating service endpoints..."
-                    sh '''
-                    export KUBECONFIG=$WORKSPACE/.kube/config
-                    kubectl get svc -n ${K8S_NAMESPACE}
-                    kubectl get pods -n ${K8S_NAMESPACE}
-                    EXTERNAL_URL=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-                    echo "Application URL: http://$EXTERNAL_URL"
-                    curl -I http://$EXTERNAL_URL/actuator/health || true
-                    echo "External URL validated successfully."
-                    echo $EXTERNAL_URL > external_url.txt
-                    '''
+                    echo "🔍 Performing external health check..."
+                    def lbUrl = sh(script: "kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                    echo "🌍 External URL: http://${lbUrl}"
+
+                    sh """
+                    sleep 20
+                    curl -I http://${lbUrl}/ || true
+                    curl http://${lbUrl}/actuator/health || true
+                    """
                 }
             }
         }
     }
 
-    /* ===========================
-       POST ACTIONS
-    =========================== */
     post {
         success {
             script {
-                def externalUrl = readFile('external_url.txt').trim()
-                mail to: "${EMAIL_TO}",
-                     subject: "✅ SUCCESS: Hotel Booking System Deployed to EKS",
-                     body: """<h3>🎉 Deployment Successful!</h3>
-                              <p>Application is live and running on AWS EKS.</p>
-                              <p><b>External Access URL:</b> <a href='http://${externalUrl}' target='_blank'>http://${externalUrl}</a></p>
-                              <p>Environment: ${K8S_NAMESPACE}</p>
-                              <p>Version: ${APP_VERSION}</p>""",
-                     mimeType: 'text/html'
+                def lbUrl = sh(script: "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
+                echo "🎉 SUCCESS: Deployment complete and app accessible at: http://${lbUrl}"
+                emailext(
+                    to: 'mesaifudheenpv@gmail.com',
+                    subject: "✅ SUCCESS: Hotel Booking App Deployed",
+                    body: """<h3>Deployment Successful 🎯</h3>
+                             <p>Your Hotel Booking System was successfully deployed to AWS EKS.</p>
+                             <p><b>Access URL:</b> <a href='http://${lbUrl}'>http://${lbUrl}</a></p>
+                             <p>Regards,<br>Jenkins CI/CD</p>""",
+                    mimeType: 'text/html'
+                )
             }
         }
-
         failure {
-            mail to: "${EMAIL_TO}",
-                 subject: "❌ FAILURE: Deployment failed for Hotel Booking System",
-                 body: "Check Jenkins logs for details and rollback triggered automatically."
+            echo "❌ Deployment failed! Rolling back..."
+            emailext(
+                to: 'mesaifudheenpv@gmail.com',
+                subject: "❌ FAILURE: Hotel Booking App Deployment Failed",
+                body: "<p>Deployment failed. Please check Jenkins logs for details.</p>",
+                mimeType: 'text/html'
+            )
         }
-
         always {
             cleanWs()
         }

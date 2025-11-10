@@ -162,7 +162,13 @@ pipeline {
           sh 'mkdir -p .kube && cp "$KUBECONFIG_FILE" .kube/config && chmod 600 .kube/config'
           sh 'export KUBECONFIG=.kube/config'
 
-          // EXACTLY THIS IN LOG
+          // 1. Show current context
+          sh "kubectl config current-context"
+
+          // 2. Show namespace exists
+          sh "kubectl get ns ${K8S_NAMESPACE}"
+
+          // 3. Show full URL
           sh "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'http://NOT-READY'"
 
           script {
@@ -185,6 +191,7 @@ pipeline {
   post {
     success {
       echo "SUCCESS: Deployed v${APP_VERSION}!"
+      echo "NAMESPACE: ${K8S_NAMESPACE}"
       echo "LIVE URL: ${env.APP_URL}"
       cleanWs()
     }

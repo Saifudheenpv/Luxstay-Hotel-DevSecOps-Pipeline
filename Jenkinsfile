@@ -76,7 +76,7 @@ pipeline {
     stage('Build, Test & OWASP') {
       steps {
         withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-          sh '''
+          sh """
             # Ensure suppression file exists
             if [ ! -f dependency-check-suppressions.xml ]; then
               cat > dependency-check-suppressions.xml <<'OWASP_EOF'
@@ -93,13 +93,10 @@ OWASP_EOF
 
             # Clean and compile with tests; use test profile explicitly for H2 database
             echo "Running tests with H2 in-memory database (test profile)..."
-            mvn -U -B clean verify \
-              -Dserver.port=0 \
-              -Dspring.profiles.active=test \
-              -Dnvd.api.key="$NVD_API_KEY"
+            mvn -U -B clean verify -Dserver.port=0 -Dspring.profiles.active=test -Dnvd.api.key="$NVD_API_KEY"
             
             echo "✅ All tests passed with H2 in-memory database!"
-          '''
+          """
         }
       }
     }
@@ -109,13 +106,13 @@ OWASP_EOF
       steps {
         withSonarQubeEnv('Sonar-Server') {
           withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_AUTH_TOKEN')]) {
-            sh '''
+            sh """
               mvn -B sonar:sonar \
                 -Dsonar.projectKey='hotel-booking-system' \
                 -Dsonar.host.url=http://${SONARQUBE_URL}:9000 \
                 -Dsonar.login="$SONAR_AUTH_TOKEN" \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-            '''
+            """
           }
         }
       }
@@ -125,14 +122,14 @@ OWASP_EOF
     stage('Docker Build & Push') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'docker-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
+          sh """
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             docker build -t ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} .
             docker tag ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION} ${DOCKER_NAMESPACE}/${APP_NAME}:latest
             docker push ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
             docker push ${DOCKER_NAMESPACE}/${APP_NAME}:latest
             echo "✅ Docker images pushed successfully!"
-          '''
+          """
         }
       }
     }
@@ -144,11 +141,11 @@ OWASP_EOF
           [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
         ]) {
-          sh '''
-            mkdir -p $WORKSPACE/.kube
-            cp $KUBECONFIG_FILE $WORKSPACE/.kube/config
-            chmod 600 $WORKSPACE/.kube/config
-            export KUBECONFIG=$WORKSPACE/.kube/config
+          sh """
+            mkdir -p \$WORKSPACE/.kube
+            cp \$KUBECONFIG_FILE \$WORKSPACE/.kube/config
+            chmod 600 \$WORKSPACE/.kube/config
+            export KUBECONFIG=\$WORKSPACE/.kube/config
 
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
 
@@ -159,7 +156,7 @@ OWASP_EOF
             kubectl apply -f k8s/app-deployment-blue.yaml -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE}
             echo "✅ Kubernetes deployment applied successfully!"
-          '''
+          """
         }
       }
     }
@@ -172,15 +169,14 @@ OWASP_EOF
           [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
         ]) {
-          sh '''
-            export KUBECONFIG=$WORKSPACE/.kube/config
+          sh """
+            export KUBECONFIG=\$WORKSPACE/.kube/config
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
 
             echo "Switching traffic to GREEN deployment..."
-            kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
-              -p '{"spec":{"selector":{"app":"hotel-booking","version":"green"}}}'
+            kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} -p '{"spec":{"selector":{"app":"hotel-booking","version":"green"}}}'
             echo "✅ Traffic switched to GREEN deployment!"
-          '''
+          """
         }
       }
     }
@@ -192,8 +188,8 @@ OWASP_EOF
           [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
         ]) {
-          sh '''
-            export KUBECONFIG=$WORKSPACE/.kube/config
+          sh """
+            export KUBECONFIG=\$WORKSPACE/.kube/config
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
 
             echo "📋 Deployment Resources:"
@@ -208,16 +204,16 @@ OWASP_EOF
             kubectl get pods -n ${K8S_NAMESPACE} -o wide
             
             # Health check with retry logic
-            APP_URL=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-            if [ -z "$APP_URL" ]; then
-              APP_URL=$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            APP_URL=\$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            if [ -z "\$APP_URL" ]; then
+              APP_URL=\$(kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
             fi
             
-            if [ -n "$APP_URL" ]; then
-              echo "🔍 Health check at: http://$APP_URL/actuator/health"
+            if [ -n "\$APP_URL" ]; then
+              echo "🔍 Health check at: http://\$APP_URL/actuator/health"
               for i in {1..5}; do
-                echo "Attempt $i to check application health..."
-                if curl -f -s --max-time 10 "http://$APP_URL/actuator/health" > /dev/null; then
+                echo "Attempt \$i to check application health..."
+                if curl -f -s --max-time 10 "http://\$APP_URL/actuator/health" > /dev/null; then
                   echo "✅ Application health check PASSED!"
                   break
                 else
@@ -228,7 +224,7 @@ OWASP_EOF
             else
               echo "⚠️  Could not determine application URL, skipping health check"
             fi
-          '''
+          """
         }
       }
     }
@@ -237,11 +233,20 @@ OWASP_EOF
   post {
     success {
       echo "✅ SUCCESS: Built, scanned, analyzed, pushed and deployed!"
-      sh '''
-        echo "🎉 Pipeline completed successfully!"
-        echo "Application deployed to:"
-        kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o wide
-      '''
+      script {
+        withCredentials([
+          [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
+          file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
+        ]) {
+          sh """
+            export KUBECONFIG=\$WORKSPACE/.kube/config
+            aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
+            echo "🎉 Pipeline completed successfully!"
+            echo "Application deployed to:"
+            kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o wide
+          """
+        }
+      }
       cleanWs()
     }
     failure {
@@ -251,20 +256,19 @@ OWASP_EOF
           [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
         ]) {
-          sh '''
-            export KUBECONFIG=$WORKSPACE/.kube/config
+          sh """
+            export KUBECONFIG=\$WORKSPACE/.kube/config
             aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
             echo "Rolling back to BLUE deployment..."
-            kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
-              -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
+            kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
             echo "✅ Rollback completed!"
-          '''
+          """
         }
       }
       cleanWs()
     }
     always {
-      echo "🏁 Pipeline finished at: $(date)"
+      echo "🏁 Pipeline finished at: \$(date)"
     }
   }
 }

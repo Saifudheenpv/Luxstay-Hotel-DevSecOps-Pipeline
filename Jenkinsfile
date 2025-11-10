@@ -14,7 +14,7 @@ pipeline {
     K8S_NAMESPACE     = 'hotel-booking'
     REGION            = 'ap-south-1'
     CLUSTER_NAME      = 'devops-cluster'
-    APP_URL           = 'URL not available'
+    APP_URL           = 'NOT-READY'
   }
 
   options {
@@ -167,20 +167,22 @@ pipeline {
           sh "kubectl config current-context"
           sh "kubectl get ns ${K8S_NAMESPACE}"
 
-          // FULL SERVICE OUTPUT IN LOG — YOU WANT THIS
+          // FULL TABLE IN LOG
           sh "kubectl get svc hotel-booking-service -n hotel-booking"
 
-          // EXTRACT EXTERNAL-IP AND SET APP_URL (HIDDEN FROM LOG)
+          // EXTRACT EXTERNAL-IP FROM TABLE (NO jsonpath IN LOG)
           script {
-            def externalIp = sh(
-              script: "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'NOT-READY'",
+            def output = sh(
+              script: "kubectl get svc hotel-booking-service -n hotel-booking --no-headers",
               returnStdout: true
             ).trim()
 
+            def externalIp = output.split()[3]  // 4th column
+
             if (externalIp && externalIp.contains('elb.amazonaws.com')) {
-              env.APP_URL = "http://$externalIp"
+              env.APP_URL = externalIp
             } else {
-              env.APP_URL = "http://NOT-READY"
+              env.APP_URL = "NOT-READY"
             }
           }
         }
@@ -193,7 +195,7 @@ pipeline {
       echo "SUCCESS: Deployed v${APP_VERSION}!"
       echo "CLUSTER: ${CLUSTER_NAME}"
       echo "NAMESPACE: ${K8S_NAMESPACE}"
-      echo "LIVE URL: ${env.APP_URL}"
+      echo "EXTERNAL-IP: ${env.APP_URL}"
       cleanWs()
     }
     failure {

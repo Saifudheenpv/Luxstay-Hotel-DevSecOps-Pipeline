@@ -64,7 +64,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQubeServer') {
+                withSonarQubeEnv('Sonar-Server') {
                     sh 'mvn sonar:sonar -Dsonar.projectKey=hotel-booking -Dsonar.host.url=http://13.203.26.99:9000 -Dsonar.login=$SONAR_AUTH_TOKEN'
                 }
             }

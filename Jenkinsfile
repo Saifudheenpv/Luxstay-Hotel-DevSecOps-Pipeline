@@ -160,34 +160,25 @@ pipeline {
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
         ]) {
           script {
-            def dns = ""
-            def maxRetries = 10
-            def retryDelay = 3
-
             sh 'mkdir -p .kube && cp "$KUBECONFIG_FILE" .kube/config && chmod 600 .kube/config'
             sh 'export KUBECONFIG=.kube/config'
 
-            for (int i = 0; i < maxRetries; i++) {
-              dns = sh(
-                script: "kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo ''",
-                returnStdout: true
-              ).trim()
+            def rawOutput = sh(
+              script: "kubectl get svc hotel-booking-service -n ${K8S_NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'NOT READY'",
+              returnStdout: true
+            ).trim()
 
-              if (dns && dns =~ /elb\.ap-south-1\.amazonaws\.com/) {
-                env.APP_URL = "http://$dns"
-                echo "LIVE URL DETECTED: ${env.APP_URL}"
-                break
-              } else {
-                echo "Waiting for NLB DNS... (attempt ${i + 1}/${maxRetries})"
-                sleep(retryDelay)
-              }
-            }
+            echo "KUBECTL OUTPUT: ${rawOutput}"
 
-            if (!dns || !dns.contains('elb.ap-south-1')) {
-              error "NLB DNS not available after ${maxRetries * retryDelay} seconds. Check EKS Service."
+            if (rawOutput && rawOutput =~ /elb\.ap-south-1\.amazonaws\.com/) {
+              env.APP_URL = "http://$rawOutput"
+              echo "LIVE URL DETECTED: ${env.APP_URL}"
+            } else {
+              env.APP_URL = "http://NOT-READY-CHECK-KUBECTL-OUTPUT"
+              echo "DNS NOT READY YET — Check above kubectl output"
             }
           }
-          echo "OPEN YOUR SITE: ${env.APP_URL}"
+          echo "OPEN YOUR SITE (if ready): ${env.APP_URL}"
         }
       }
     }

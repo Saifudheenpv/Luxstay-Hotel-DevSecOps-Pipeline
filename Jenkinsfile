@@ -267,7 +267,31 @@ pipeline {
   /* ---------------- POST ACTIONS ---------------- */
   post {
     success {
-      echo "SUCCESS: Deployed v\${APP_VERSION}!"
+      echo "SUCCESS: Deployed v${APP_VERSION}!"
+      echo "LIVE APPLICATION URL: ${APP_URL}"
+      echo "Open in browser: ${APP_URL}"
+      cleanWs()
+    }
+    failure {
+      echo "FAILED: Rolling back to BLUE..."
+      withCredentials([
+        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-eks-creds'],
+        file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')
+      ]) {
+        sh """
+          export KUBECONFIG="$WORKSPACE/.kube/config"
+          aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${REGION}
+          kubectl patch service hotel-booking-service -n ${K8S_NAMESPACE} \
+            -p '{"spec":{"selector":{"app":"hotel-booking","version":"blue"}}}' || true
+          echo "Rollback to BLUE completed!"
+        """
+      }
+      cleanWs()
+    }
+    always {
+      echo "Pipeline finished at: ${new Date().format('yyyy-MM-dd HH:mm:ss IST')}"
+    }
+  }
       echo "LIVE APPLICATION URL: \${APP_URL}"
       echo "Open in browser: \${APP_URL}"
       cleanWs()

@@ -1,92 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.0</version>
         <relativePath/>
     </parent>
-    
+
     <groupId>com.hotel</groupId>
     <artifactId>hotel-booking-system</artifactId>
     <version>1.0.0</version>
     <name>Hotel Booking System</name>
     <description>Full-stack hotel booking system with Spring Boot</description>
-    
+
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-        <!-- SonarQube Properties -->
+
+        <!-- SonarQube -->
         <sonar.projectKey>hotel-booking-system</sonar.projectKey>
         <sonar.projectName>Hotel Booking System</sonar.projectName>
         <sonar.host.url>http://13.233.38.12:9000</sonar.host.url>
         <sonar.coverage.exclusions>**/config/**,**/model/**,**/HotelBookingApplication.java</sonar.coverage.exclusions>
-        
-        <!-- JaCoCo Properties -->
+
+        <!-- Versions -->
         <jacoco.version>0.8.8</jacoco.version>
         <sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
-        <dependency-check.version>7.4.4</dependency-check.version>
+        <dependency-check.version>12.1.0</dependency-check.version>
     </properties>
-    
+
     <dependencies>
-        <!-- Spring Boot Starters -->
+        <!-- Spring Boot Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        
-        <!-- Spring Boot Actuator for Health Checks -->
+
+        <!-- Spring Boot Actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        
-        <!-- Database -->
+
+        <!-- MySQL Database -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 Database for Tests -->
+        <!-- H2 Database (for Tests) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        
-        <!-- Development Tools -->
+
+        <!-- DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-        
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -100,9 +101,10 @@
             </exclusions>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
+
             <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -123,7 +125,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -135,8 +137,8 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-            
-            <!-- Maven Surefire Plugin for Tests -->
+
+            <!-- Maven Surefire Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -155,24 +157,12 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-            
-            <!-- JaCoCo for Code Coverage -->
+
+            <!-- JaCoCo Plugin -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
-                <configuration>
-                    <destFile>${project.build.directory}/jacoco.exec</destFile>
-                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                    <output>file</output>
-                    <append>true</append>
-                    <excludes>
-                        <exclude>**/config/**</exclude>
-                        <exclude>**/model/**</exclude>
-                        <exclude>**/HotelBookingApplication.class</exclude>
-                        <exclude>**/SimplePasswordEncoder.class</exclude>
-                    </excludes>
-                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -187,36 +177,32 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
-            
+
             <!-- SonarQube Plugin -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>${sonar-maven-plugin.version}</version>
             </plugin>
-            
-            <!-- OWASP Dependency Check Plugin -->
+
+            <!-- ✅ UPDATED OWASP Dependency Check Plugin (v12.1.0) -->
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>${dependency-check.version}</version>
                 <configuration>
-                    <format>HTML</format>
-                    <format>XML</format>
-                    <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                    <formats>
+                        <format>HTML</format>
+                        <format>XML</format>
+                    </formats>
+                    <failBuildOnCVSS>0</failBuildOnCVSS>
+                    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+                    <dataDirectory>${project.build.directory}/dependency-check-data</dataDirectory>
+                    <autoupdate>true</autoupdate>
+                    <prettyPrint>true</prettyPrint>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -226,7 +212,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Maven Resources Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -236,8 +222,9 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
         </plugins>
-        
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -257,7 +244,7 @@
             </resource>
         </resources>
     </build>
-    
+
     <profiles>
         <profile>
             <id>dev</id>
@@ -268,24 +255,26 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
+
         <profile>
             <id>test</id>
             <properties>
                 <spring.profiles.active>test</spring.profiles.active>
             </properties>
         </profile>
+
         <profile>
             <id>prod</id>
             <properties>
                 <spring.profiles.active>prod</spring.profiles.active>
             </properties>
         </profile>
+
         <profile>
             <id>sonar</id>
             <properties>
                 <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
                 <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-                <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
             </properties>
         </profile>
     </profiles>

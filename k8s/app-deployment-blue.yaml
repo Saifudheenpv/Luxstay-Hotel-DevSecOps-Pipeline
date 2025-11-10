@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: hotel-booking
-        image: saifudheenpv/hotel-booking-system:latest
+        image: saifudheenpv/hotel-booking-system:${APP_VERSION}
         ports:
         - containerPort: 8080
         env:

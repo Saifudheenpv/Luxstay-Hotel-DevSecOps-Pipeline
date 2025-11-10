@@ -162,13 +162,12 @@ pipeline {
           sh 'mkdir -p .kube && cp "$KUBECONFIG_FILE" .kube/config && chmod 600 .kube/config'
           sh 'export KUBECONFIG=.kube/config'
 
-          // ONLY THIS — RAW KUBECTL IN LOG
-          sh "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'NOT READY'"
+          // EXACTLY THIS IN LOG
+          sh "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='http://{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'http://NOT-READY'"
 
-          // Optional: Set URL for post/success
           script {
             def dns = sh(
-              script: "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'NOT READY'",
+              script: "kubectl get svc hotel-booking-service -n hotel-booking -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo 'NOT-READY'",
               returnStdout: true
             ).trim()
 

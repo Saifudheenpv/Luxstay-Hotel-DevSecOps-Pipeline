@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/suppressions.xsd">
-  <suppress until="2027-01-01">
+  <suppress until="2028-01-01">
     <notes><![CDATA[Embedded Tomcat - false positives in container]]></notes>
     <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*$</packageUrl>
     <cve>CVE-2024-50379</cve>

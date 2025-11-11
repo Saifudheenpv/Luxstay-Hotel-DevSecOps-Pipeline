@@ -1,51 +1,24 @@
-# 🏨 Luxstay Hotel Booking System — DevSecOps CI/CD Pipeline 🚀
+# 🏨 Luxstay Hotel Booking System — CI/CD Pipeline (Jenkins + DevSecOps)
 
-> **A full-scale, production-grade Java Spring Boot application** deployed through a modern **DevSecOps pipeline** using Jenkins, Docker, SonarQube, OWASP, Trivy, Kubernetes (EKS), and AWS Cloud.
-
----
-
-## 🌟 Project Overview
-
-**Luxstay Hotel Booking System** is a **Spring Boot web application** that provides room booking, user management, and transaction handling — all deployed through a **secure, automated CI/CD pipeline** following **DevSecOps best practices**.
-
-The pipeline integrates **security (OWASP, Trivy)**, **quality (SonarQube)**, **automation (Jenkins)**, and **scalable deployment (EKS)**.
+A **fully automated CI/CD DevSecOps pipeline** built using **Jenkins Declarative Pipeline** for the **Hotel Booking System (Spring Boot + Maven)** project.  
+It integrates **SonarQube**, **OWASP Security Scan**, **Trivy**, **Docker**, and **AWS EKS (Kubernetes)** for zero-downtime deployment.
 
 ---
 
-## 🧰 Tech Stack
-
-### 🧱 Backend (Application)
-- **Java 17**
-- **Spring Boot 3.3.11 (secured version)**
-- **Spring Data JPA + Hibernate**
-- **MySQL 8.x**
-- **Thymeleaf** for lightweight UI
-- **Spring Boot Actuator** for health checks
-
-### 🧩 DevOps / Cloud Stack
-- **Jenkins (Declarative Pipeline)** – CI/CD Orchestrator  
-- **Docker + DockerHub** – Containerization  
-- **OWASP Dependency Check** – Dependency vulnerability scanning  
-- **Trivy** – Container image security scan  
-- **SonarQube** – Static code analysis  
-- **Kubernetes (AWS EKS)** – Deployment & scaling  
-- **AWS CLI + IAM** – EKS access  
-- **Email Notification (Gmail SMTP)** – Automated build alerts  
-
----
-
-## ⚙️ CI/CD Pipeline Workflow
-
-Every GitHub push automatically triggers this **DevSecOps pipeline**:
+## 🚀 **Pipeline Overview**
 
 ```mermaid
-graph TD
-    A[GitHub Push] -->|Webhook Trigger| B[Jenkins Pipeline]
-    B --> C[Build & Test (Maven)]
-    C --> D[OWASP Dependency Scan]
-    D --> E[SonarQube Code Quality Analysis]
-    E --> F[Docker Build & Push to DockerHub]
-    F --> G[Trivy Image Vulnerability Scan]
-    G --> H[Deploy to AWS EKS (Blue/Green)]
-    H --> I[Email Notification (Success/Failure)]
-```
+flowchart TD
+  A[💻 Developer Push Code to GitHub] --> B[🔁 Jenkins Trigger]
+  B --> C[⚙️ Build & Unit Test (Maven)]
+  C --> D[🔍 OWASP Dependency Check]
+  D --> E[🧠 SonarQube Code Analysis]
+  E --> F[🐳 Docker Build & Push to DockerHub]
+  F --> G[🛡️ Trivy Image Security Scan]
+  G --> H[☸️ Deploy to AWS EKS (Kubernetes)]
+  H --> I{Deployment Strategy}
+  I -->|Blue-Green| J[🟩 Switch Traffic to Green]
+  I -->|Rolling| K[🔄 Rolling Update]
+  J --> L[✅ Email Notification: Success]
+  K --> L
+  B --> M[❌ Email Notification: Failure]

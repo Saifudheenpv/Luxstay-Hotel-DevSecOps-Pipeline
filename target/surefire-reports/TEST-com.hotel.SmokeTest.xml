@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.hotel.SmokeTest" time="5.52" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.hotel.SmokeTest" time="5.709" tests="3" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
-    <property name="java.class.path" value="/home/saifudheen/Projects/Hotel-Booking-System/target/test-classes:/home/saifudheen/Projects/Hotel-Booking-System/target/classes:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.3.5/spring-boot-starter-web-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter/3.3.5/spring-boot-starter-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot/3.3.5/spring-boot-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.3.5/spring-boot-autoconfigure-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.3.5/spring-boot-starter-logging-3.3.5.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-classic/1.5.11/logback-classic-1.5.11.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-core/1.5.11/logback-core-1.5.11.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-api/2.23.1/log4j-api-2.23.1.jar:/home/saifudheen/.m2/repository/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.jar:/home/saifudheen/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/home/saifudheen/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.3.5/spring-boot-starter-json-3.3.5.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.17.2/jackson-databind-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.17.2/jackson-annotations-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.17.2/jackson-core-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.17.2/jackson-datatype-jdk8-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.17.2/jackson-datatype-jsr310-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.17.2/jackson-module-parameter-names-2.17.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.3.5/spring-boot-starter-tomcat-3.3.5.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.31/tomcat-embed-core-10.1.31.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.31/tomcat-embed-websocket-10.1.31.jar:/home/saifudheen/.m2/repository/org/springframework/spring-web/6.1.14/spring-web-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-beans/6.1.14/spring-beans-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-webmvc/6.1.14/spring-webmvc-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aop/6.1.14/spring-aop-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-context/6.1.14/spring-context-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-expression/6.1.14/spring-expression-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.3.5/spring-boot-starter-actuator-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.3.5/spring-boot-actuator-autoconfigure-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator/3.3.5/spring-boot-actuator-3.3.5.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-observation/1.13.6/micrometer-observation-1.13.6.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-commons/1.13.6/micrometer-commons-1.13.6.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-jakarta9/1.13.6/micrometer-jakarta9-1.13.6.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-core/1.13.6/micrometer-core-1.13.6.jar:/home/saifudheen/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar:/home/saifudheen/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.3.5/spring-boot-starter-data-jpa-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.3.5/spring-boot-starter-aop-3.3.5.jar:/home/saifudheen/.m2/repository/org/aspectj/aspectjweaver/1.9.22.1/aspectjweaver-1.9.22.1.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.3.5/spring-boot-starter-jdbc-3.3.5.jar:/home/saifudheen/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jdbc/6.1.14/spring-jdbc-6.1.14.jar:/home/saifudheen/.m2/repository/org/hibernate/orm/hibernate-core/6.5.3.Final/hibernate-core-6.5.3.Final.jar:/home/saifudheen/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/home/saifudheen/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/home/saifudheen/.m2/repository/org/hibernate/common/hibernate-commons-annotations/6.0.6.Final/hibernate-commons-annotations-6.0.6.Final.jar:/home/saifudheen/.m2/repository/io/smallrye/jandex/3.1.2/jandex-3.1.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy/1.14.19/byte-buddy-1.14.19.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar:/home/saifudheen/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar:/home/saifudheen/.m2/repository/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar:/home/saifudheen/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-jpa/3.3.5/spring-data-jpa-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-commons/3.3.5/spring-data-commons-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/spring-orm/6.1.14/spring-orm-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-tx/6.1.14/spring-tx-6.1.14.jar:/home/saifudheen/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aspects/6.1.14/spring-aspects-6.1.14.jar:/home/saifudheen/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-thymeleaf/3.3.5/spring-boot-starter-thymeleaf-3.3.5.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf-spring6/3.1.2.RELEASE/thymeleaf-spring6-3.1.2.RELEASE.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf/3.1.2.RELEASE/thymeleaf-3.1.2.RELEASE.jar:/home/saifudheen/.m2/repository/org/attoparser/attoparser/2.0.7.RELEASE/attoparser-2.0.7.RELEASE.jar:/home/saifudheen/.m2/repository/org/unbescape/unbescape/1.1.6.RELEASE/unbescape-1.1.6.RELEASE.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.3.5/spring-boot-starter-validation-3.3.5.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.31/tomcat-embed-el-10.1.31.jar:/home/saifudheen/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.1.Final/hibernate-validator-8.0.1.Final.jar:/home/saifudheen/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.3.5/spring-boot-starter-test-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test/3.3.5/spring-boot-test-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.3.5/spring-boot-test-autoconfigure-3.3.5.jar:/home/saifudheen/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/home/saifudheen/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/home/saifudheen/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/home/saifudheen/.m2/repository/net/minidev/json-smart/2.5.1/json-smart-2.5.1.jar:/home/saifudheen/.m2/repository/net/minidev/accessors-smart/2.5.1/accessors-smart-2.5.1.jar:/home/saifudheen/.m2/repository/org/ow2/asm/asm/9.6/asm-9.6.jar:/home/saifudheen/.m2/repository/org/assertj/assertj-core/3.25.3/assertj-core-3.25.3.jar:/home/saifudheen/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/home/saifudheen/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.5/junit-jupiter-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.5/junit-jupiter-api-5.10.5.jar:/home/saifudheen/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-commons/1.10.5/junit-platform-commons-1.10.5.jar:/home/saifudheen/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.5/junit-jupiter-params-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.5/junit-jupiter-engine-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-engine/1.10.5/junit-platform-engine-1.10.5.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-core/5.11.0/mockito-core-5.11.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar:/home/saifudheen/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-junit-jupiter/5.11.0/mockito-junit-jupiter-5.11.0.jar:/home/saifudheen/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/home/saifudheen/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/home/saifudheen/.m2/repository/org/springframework/spring-core/6.1.14/spring-core-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jcl/6.1.14/spring-jcl-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-test/6.1.14/spring-test-6.1.14.jar:/home/saifudheen/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/home/saifudheen/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar:"/>
+    <property name="java.class.path" value="/home/saifudheen/Projects/Hotel-Booking-System/target/test-classes:/home/saifudheen/Projects/Hotel-Booking-System/target/classes:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.3.11/spring-boot-starter-web-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter/3.3.11/spring-boot-starter-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot/3.3.11/spring-boot-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.3.11/spring-boot-autoconfigure-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.3.11/spring-boot-starter-logging-3.3.11.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-api/2.23.1/log4j-api-2.23.1.jar:/home/saifudheen/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/home/saifudheen/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/home/saifudheen/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.3.11/spring-boot-starter-json-3.3.11.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.17.3/jackson-databind-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.17.3/jackson-annotations-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.17.3/jackson-core-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.17.3/jackson-datatype-jdk8-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.17.3/jackson-datatype-jsr310-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.17.3/jackson-module-parameter-names-2.17.3.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.3.11/spring-boot-starter-tomcat-3.3.11.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.45/tomcat-embed-core-10.1.45.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.40/tomcat-embed-websocket-10.1.40.jar:/home/saifudheen/.m2/repository/org/springframework/spring-web/6.1.19/spring-web-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-beans/6.1.19/spring-beans-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-webmvc/6.1.19/spring-webmvc-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aop/6.1.19/spring-aop-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-context/6.1.19/spring-context-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-expression/6.1.19/spring-expression-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.3.11/spring-boot-starter-actuator-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.3.11/spring-boot-actuator-autoconfigure-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator/3.3.11/spring-boot-actuator-3.3.11.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-observation/1.13.13/micrometer-observation-1.13.13.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-commons/1.13.13/micrometer-commons-1.13.13.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-jakarta9/1.13.13/micrometer-jakarta9-1.13.13.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-core/1.13.13/micrometer-core-1.13.13.jar:/home/saifudheen/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar:/home/saifudheen/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.3.11/spring-boot-starter-data-jpa-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.3.11/spring-boot-starter-aop-3.3.11.jar:/home/saifudheen/.m2/repository/org/aspectj/aspectjweaver/1.9.24/aspectjweaver-1.9.24.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.3.11/spring-boot-starter-jdbc-3.3.11.jar:/home/saifudheen/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jdbc/6.1.19/spring-jdbc-6.1.19.jar:/home/saifudheen/.m2/repository/org/hibernate/orm/hibernate-core/6.5.3.Final/hibernate-core-6.5.3.Final.jar:/home/saifudheen/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/home/saifudheen/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/home/saifudheen/.m2/repository/org/hibernate/common/hibernate-commons-annotations/6.0.6.Final/hibernate-commons-annotations-6.0.6.Final.jar:/home/saifudheen/.m2/repository/io/smallrye/jandex/3.1.2/jandex-3.1.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy/1.14.19/byte-buddy-1.14.19.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar:/home/saifudheen/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar:/home/saifudheen/.m2/repository/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar:/home/saifudheen/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-jpa/3.3.11/spring-data-jpa-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-commons/3.3.11/spring-data-commons-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/spring-orm/6.1.19/spring-orm-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-tx/6.1.19/spring-tx-6.1.19.jar:/home/saifudheen/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aspects/6.1.19/spring-aspects-6.1.19.jar:/home/saifudheen/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-thymeleaf/3.3.11/spring-boot-starter-thymeleaf-3.3.11.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf-spring6/3.1.3.RELEASE/thymeleaf-spring6-3.1.3.RELEASE.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf/3.1.3.RELEASE/thymeleaf-3.1.3.RELEASE.jar:/home/saifudheen/.m2/repository/org/attoparser/attoparser/2.0.7.RELEASE/attoparser-2.0.7.RELEASE.jar:/home/saifudheen/.m2/repository/org/unbescape/unbescape/1.1.6.RELEASE/unbescape-1.1.6.RELEASE.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.3.11/spring-boot-starter-validation-3.3.11.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.40/tomcat-embed-el-10.1.40.jar:/home/saifudheen/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.2.Final/hibernate-validator-8.0.2.Final.jar:/home/saifudheen/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.3.11/spring-boot-starter-test-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test/3.3.11/spring-boot-test-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.3.11/spring-boot-test-autoconfigure-3.3.11.jar:/home/saifudheen/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/home/saifudheen/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/home/saifudheen/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/home/saifudheen/.m2/repository/net/minidev/json-smart/2.5.2/json-smart-2.5.2.jar:/home/saifudheen/.m2/repository/net/minidev/accessors-smart/2.5.2/accessors-smart-2.5.2.jar:/home/saifudheen/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar:/home/saifudheen/.m2/repository/org/assertj/assertj-core/3.25.3/assertj-core-3.25.3.jar:/home/saifudheen/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/home/saifudheen/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.5/junit-jupiter-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.5/junit-jupiter-api-5.10.5.jar:/home/saifudheen/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-commons/1.10.5/junit-platform-commons-1.10.5.jar:/home/saifudheen/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.5/junit-jupiter-params-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.5/junit-jupiter-engine-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-engine/1.10.5/junit-platform-engine-1.10.5.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-core/5.11.0/mockito-core-5.11.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar:/home/saifudheen/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-junit-jupiter/5.11.0/mockito-junit-jupiter-5.11.0.jar:/home/saifudheen/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/home/saifudheen/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/home/saifudheen/.m2/repository/org/springframework/spring-core/6.1.19/spring-core-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jcl/6.1.19/spring-jcl-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-test/6.1.19/spring-test-6.1.19.jar:/home/saifudheen/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/home/saifudheen/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar:"/>
     <property name="java.vm.vendor" value="Ubuntu"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="java.vendor.url" value="https://ubuntu.com/"/>
@@ -14,26 +14,24 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
-    <property name="sun.java.command" value="/home/saifudheen/Projects/Hotel-Booking-System/target/surefire/surefirebooter-20251110113439610_3.jar /home/saifudheen/Projects/Hotel-Booking-System/target/surefire 2025-11-10T11-34-39_502-jvmRun1 surefire-20251110113439610_1tmp surefire_0-20251110113439610_2tmp"/>
+    <property name="sun.java.command" value="/home/saifudheen/Projects/Hotel-Booking-System/target/surefire/surefirebooter-20251111094042586_3.jar /home/saifudheen/Projects/Hotel-Booking-System/target/surefire 2025-11-11T09-40-42_493-jvmRun1 surefire-20251111094042586_1tmp surefire_0-20251111094042586_2tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="surefire.test.class.path" value="/home/saifudheen/Projects/Hotel-Booking-System/target/test-classes:/home/saifudheen/Projects/Hotel-Booking-System/target/classes:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.3.5/spring-boot-starter-web-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter/3.3.5/spring-boot-starter-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot/3.3.5/spring-boot-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.3.5/spring-boot-autoconfigure-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.3.5/spring-boot-starter-logging-3.3.5.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-classic/1.5.11/logback-classic-1.5.11.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-core/1.5.11/logback-core-1.5.11.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-api/2.23.1/log4j-api-2.23.1.jar:/home/saifudheen/.m2/repository/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.jar:/home/saifudheen/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/home/saifudheen/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.3.5/spring-boot-starter-json-3.3.5.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.17.2/jackson-databind-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.17.2/jackson-annotations-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.17.2/jackson-core-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.17.2/jackson-datatype-jdk8-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.17.2/jackson-datatype-jsr310-2.17.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.17.2/jackson-module-parameter-names-2.17.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.3.5/spring-boot-starter-tomcat-3.3.5.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.31/tomcat-embed-core-10.1.31.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.31/tomcat-embed-websocket-10.1.31.jar:/home/saifudheen/.m2/repository/org/springframework/spring-web/6.1.14/spring-web-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-beans/6.1.14/spring-beans-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-webmvc/6.1.14/spring-webmvc-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aop/6.1.14/spring-aop-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-context/6.1.14/spring-context-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-expression/6.1.14/spring-expression-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.3.5/spring-boot-starter-actuator-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.3.5/spring-boot-actuator-autoconfigure-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator/3.3.5/spring-boot-actuator-3.3.5.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-observation/1.13.6/micrometer-observation-1.13.6.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-commons/1.13.6/micrometer-commons-1.13.6.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-jakarta9/1.13.6/micrometer-jakarta9-1.13.6.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-core/1.13.6/micrometer-core-1.13.6.jar:/home/saifudheen/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar:/home/saifudheen/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.3.5/spring-boot-starter-data-jpa-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.3.5/spring-boot-starter-aop-3.3.5.jar:/home/saifudheen/.m2/repository/org/aspectj/aspectjweaver/1.9.22.1/aspectjweaver-1.9.22.1.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.3.5/spring-boot-starter-jdbc-3.3.5.jar:/home/saifudheen/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jdbc/6.1.14/spring-jdbc-6.1.14.jar:/home/saifudheen/.m2/repository/org/hibernate/orm/hibernate-core/6.5.3.Final/hibernate-core-6.5.3.Final.jar:/home/saifudheen/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/home/saifudheen/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/home/saifudheen/.m2/repository/org/hibernate/common/hibernate-commons-annotations/6.0.6.Final/hibernate-commons-annotations-6.0.6.Final.jar:/home/saifudheen/.m2/repository/io/smallrye/jandex/3.1.2/jandex-3.1.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy/1.14.19/byte-buddy-1.14.19.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar:/home/saifudheen/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar:/home/saifudheen/.m2/repository/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar:/home/saifudheen/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-jpa/3.3.5/spring-data-jpa-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-commons/3.3.5/spring-data-commons-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/spring-orm/6.1.14/spring-orm-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-tx/6.1.14/spring-tx-6.1.14.jar:/home/saifudheen/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aspects/6.1.14/spring-aspects-6.1.14.jar:/home/saifudheen/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-thymeleaf/3.3.5/spring-boot-starter-thymeleaf-3.3.5.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf-spring6/3.1.2.RELEASE/thymeleaf-spring6-3.1.2.RELEASE.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf/3.1.2.RELEASE/thymeleaf-3.1.2.RELEASE.jar:/home/saifudheen/.m2/repository/org/attoparser/attoparser/2.0.7.RELEASE/attoparser-2.0.7.RELEASE.jar:/home/saifudheen/.m2/repository/org/unbescape/unbescape/1.1.6.RELEASE/unbescape-1.1.6.RELEASE.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.3.5/spring-boot-starter-validation-3.3.5.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.31/tomcat-embed-el-10.1.31.jar:/home/saifudheen/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.1.Final/hibernate-validator-8.0.1.Final.jar:/home/saifudheen/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.3.5/spring-boot-starter-test-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test/3.3.5/spring-boot-test-3.3.5.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.3.5/spring-boot-test-autoconfigure-3.3.5.jar:/home/saifudheen/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/home/saifudheen/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/home/saifudheen/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/home/saifudheen/.m2/repository/net/minidev/json-smart/2.5.1/json-smart-2.5.1.jar:/home/saifudheen/.m2/repository/net/minidev/accessors-smart/2.5.1/accessors-smart-2.5.1.jar:/home/saifudheen/.m2/repository/org/ow2/asm/asm/9.6/asm-9.6.jar:/home/saifudheen/.m2/repository/org/assertj/assertj-core/3.25.3/assertj-core-3.25.3.jar:/home/saifudheen/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/home/saifudheen/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.5/junit-jupiter-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.5/junit-jupiter-api-5.10.5.jar:/home/saifudheen/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-commons/1.10.5/junit-platform-commons-1.10.5.jar:/home/saifudheen/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.5/junit-jupiter-params-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.5/junit-jupiter-engine-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-engine/1.10.5/junit-platform-engine-1.10.5.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-core/5.11.0/mockito-core-5.11.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar:/home/saifudheen/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-junit-jupiter/5.11.0/mockito-junit-jupiter-5.11.0.jar:/home/saifudheen/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/home/saifudheen/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/home/saifudheen/.m2/repository/org/springframework/spring-core/6.1.14/spring-core-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jcl/6.1.14/spring-jcl-6.1.14.jar:/home/saifudheen/.m2/repository/org/springframework/spring-test/6.1.14/spring-test-6.1.14.jar:/home/saifudheen/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/home/saifudheen/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar:"/>
+    <property name="surefire.test.class.path" value="/home/saifudheen/Projects/Hotel-Booking-System/target/test-classes:/home/saifudheen/Projects/Hotel-Booking-System/target/classes:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.3.11/spring-boot-starter-web-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter/3.3.11/spring-boot-starter-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot/3.3.11/spring-boot-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.3.11/spring-boot-autoconfigure-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.3.11/spring-boot-starter-logging-3.3.11.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar:/home/saifudheen/.m2/repository/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.23.1/log4j-to-slf4j-2.23.1.jar:/home/saifudheen/.m2/repository/org/apache/logging/log4j/log4j-api/2.23.1/log4j-api-2.23.1.jar:/home/saifudheen/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/home/saifudheen/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/home/saifudheen/.m2/repository/org/yaml/snakeyaml/2.2/snakeyaml-2.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.3.11/spring-boot-starter-json-3.3.11.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.17.3/jackson-databind-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.17.3/jackson-annotations-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.17.3/jackson-core-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.17.3/jackson-datatype-jdk8-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.17.3/jackson-datatype-jsr310-2.17.3.jar:/home/saifudheen/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.17.3/jackson-module-parameter-names-2.17.3.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.3.11/spring-boot-starter-tomcat-3.3.11.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.45/tomcat-embed-core-10.1.45.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.40/tomcat-embed-websocket-10.1.40.jar:/home/saifudheen/.m2/repository/org/springframework/spring-web/6.1.19/spring-web-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-beans/6.1.19/spring-beans-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-webmvc/6.1.19/spring-webmvc-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aop/6.1.19/spring-aop-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-context/6.1.19/spring-context-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-expression/6.1.19/spring-expression-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.3.11/spring-boot-starter-actuator-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.3.11/spring-boot-actuator-autoconfigure-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-actuator/3.3.11/spring-boot-actuator-3.3.11.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-observation/1.13.13/micrometer-observation-1.13.13.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-commons/1.13.13/micrometer-commons-1.13.13.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-jakarta9/1.13.13/micrometer-jakarta9-1.13.13.jar:/home/saifudheen/.m2/repository/io/micrometer/micrometer-core/1.13.13/micrometer-core-1.13.13.jar:/home/saifudheen/.m2/repository/org/hdrhistogram/HdrHistogram/2.2.2/HdrHistogram-2.2.2.jar:/home/saifudheen/.m2/repository/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.3.11/spring-boot-starter-data-jpa-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.3.11/spring-boot-starter-aop-3.3.11.jar:/home/saifudheen/.m2/repository/org/aspectj/aspectjweaver/1.9.24/aspectjweaver-1.9.24.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.3.11/spring-boot-starter-jdbc-3.3.11.jar:/home/saifudheen/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jdbc/6.1.19/spring-jdbc-6.1.19.jar:/home/saifudheen/.m2/repository/org/hibernate/orm/hibernate-core/6.5.3.Final/hibernate-core-6.5.3.Final.jar:/home/saifudheen/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/home/saifudheen/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/jboss/logging/jboss-logging/3.5.3.Final/jboss-logging-3.5.3.Final.jar:/home/saifudheen/.m2/repository/org/hibernate/common/hibernate-commons-annotations/6.0.6.Final/hibernate-commons-annotations-6.0.6.Final.jar:/home/saifudheen/.m2/repository/io/smallrye/jandex/3.1.2/jandex-3.1.2.jar:/home/saifudheen/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy/1.14.19/byte-buddy-1.14.19.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar:/home/saifudheen/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/home/saifudheen/.m2/repository/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar:/home/saifudheen/.m2/repository/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar:/home/saifudheen/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/home/saifudheen/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-jpa/3.3.11/spring-data-jpa-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/data/spring-data-commons/3.3.11/spring-data-commons-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/spring-orm/6.1.19/spring-orm-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-tx/6.1.19/spring-tx-6.1.19.jar:/home/saifudheen/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/home/saifudheen/.m2/repository/org/springframework/spring-aspects/6.1.19/spring-aspects-6.1.19.jar:/home/saifudheen/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-thymeleaf/3.3.11/spring-boot-starter-thymeleaf-3.3.11.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf-spring6/3.1.3.RELEASE/thymeleaf-spring6-3.1.3.RELEASE.jar:/home/saifudheen/.m2/repository/org/thymeleaf/thymeleaf/3.1.3.RELEASE/thymeleaf-3.1.3.RELEASE.jar:/home/saifudheen/.m2/repository/org/attoparser/attoparser/2.0.7.RELEASE/attoparser-2.0.7.RELEASE.jar:/home/saifudheen/.m2/repository/org/unbescape/unbescape/1.1.6.RELEASE/unbescape-1.1.6.RELEASE.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.3.11/spring-boot-starter-validation-3.3.11.jar:/home/saifudheen/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.40/tomcat-embed-el-10.1.40.jar:/home/saifudheen/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.2.Final/hibernate-validator-8.0.2.Final.jar:/home/saifudheen/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.3.11/spring-boot-starter-test-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test/3.3.11/spring-boot-test-3.3.11.jar:/home/saifudheen/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.3.11/spring-boot-test-autoconfigure-3.3.11.jar:/home/saifudheen/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/home/saifudheen/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/home/saifudheen/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/home/saifudheen/.m2/repository/net/minidev/json-smart/2.5.2/json-smart-2.5.2.jar:/home/saifudheen/.m2/repository/net/minidev/accessors-smart/2.5.2/accessors-smart-2.5.2.jar:/home/saifudheen/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar:/home/saifudheen/.m2/repository/org/assertj/assertj-core/3.25.3/assertj-core-3.25.3.jar:/home/saifudheen/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/home/saifudheen/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.5/junit-jupiter-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.5/junit-jupiter-api-5.10.5.jar:/home/saifudheen/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-commons/1.10.5/junit-platform-commons-1.10.5.jar:/home/saifudheen/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.5/junit-jupiter-params-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.5/junit-jupiter-engine-5.10.5.jar:/home/saifudheen/.m2/repository/org/junit/platform/junit-platform-engine/1.10.5/junit-platform-engine-1.10.5.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-core/5.11.0/mockito-core-5.11.0.jar:/home/saifudheen/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.19/byte-buddy-agent-1.14.19.jar:/home/saifudheen/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/home/saifudheen/.m2/repository/org/mockito/mockito-junit-jupiter/5.11.0/mockito-junit-jupiter-5.11.0.jar:/home/saifudheen/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/home/saifudheen/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/home/saifudheen/.m2/repository/org/springframework/spring-core/6.1.19/spring-core-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-jcl/6.1.19/spring-jcl-6.1.19.jar:/home/saifudheen/.m2/repository/org/springframework/spring-test/6.1.19/spring-test-6.1.19.jar:/home/saifudheen/.m2/repository/org/xmlunit/xmlunit-core/2.9.1/xmlunit-core-2.9.1.jar:/home/saifudheen/.m2/repository/com/h2database/h2/2.2.224/h2-2.2.224.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
     <property name="user.home" value="/home/saifudheen"/>
     <property name="user.language" value="en"/>
     <property name="java.specification.vendor" value="Oracle Corporation"/>
     <property name="java.version.date" value="2025-07-15"/>
     <property name="java.home" value="/usr/lib/jvm/java-21-openjdk-amd64"/>
-    <property name="spring.profiles.active" value="test"/>
     <property name="file.separator" value="/"/>
     <property name="basedir" value="/home/saifudheen/Projects/Hotel-Booking-System"/>
-    <property name="spring.main.lazy-initialization" value="true"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="line.separator" value="&#10;"/>
-    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="FILE_LOG_CHARSET" value="UTF-8"/>
     <property name="java.awt.headless" value="true"/>
-    <property name="surefire.real.class.path" value="/home/saifudheen/Projects/Hotel-Booking-System/target/surefire/surefirebooter-20251110113439610_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/saifudheen/Projects/Hotel-Booking-System/target/surefire/surefirebooter-20251111094042586_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.8+9-Ubuntu-0ubuntu124.04.1"/>
     <property name="user.name" value="saifudheen"/>
@@ -42,7 +40,6 @@
     <property name="os.version" value="6.14.0-35-generic"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="file.encoding" value="UTF-8"/>
-    <property name="server.port" value="0"/>
     <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
     <property name="localRepository" value="/home/saifudheen/.m2/repository"/>
     <property name="java.vendor.url.bug" value="https://bugs.launchpad.net/ubuntu/+source/openjdk-21"/>
@@ -52,7 +49,7 @@
     <property name="user.dir" value="/home/saifudheen/Projects/Hotel-Booking-System"/>
     <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="PID" value="74947"/>
+    <property name="PID" value="58403"/>
     <property name="CONSOLE_LOG_CHARSET" value="UTF-8"/>
     <property name="native.encoding" value="UTF-8"/>
     <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"/>
@@ -65,9 +62,9 @@
     <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"/>
     <property name="LOGGED_APPLICATION_NAME" value="[Hotel Booking System] "/>
   </properties>
-  <testcase name="basicMathTest" classname="com.hotel.SmokeTest" time="0.022">
-    <system-out><![CDATA[11:34:42.208 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.hotel.SmokeTest]: SmokeTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-11:34:42.310 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.hotel.HotelBookingApplication for test class com.hotel.SmokeTest
+  <testcase name="basicMathTest" classname="com.hotel.SmokeTest" time="0.012">
+    <system-out><![CDATA[09:40:44.997 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.hotel.SmokeTest]: SmokeTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+09:40:45.106 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.hotel.HotelBookingApplication for test class com.hotel.SmokeTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -76,35 +73,35 @@
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
 
- :: Spring Boot ::                (v3.3.5)
+ :: Spring Boot ::               (v3.3.11)
 
-2025-11-10 11:34:42 - com.hotel.SmokeTest - Starting SmokeTest using Java 21.0.8 with PID 74947 (started by saifudheen in /home/saifudheen/Projects/Hotel-Booking-System)
-2025-11-10 11:34:42 - com.hotel.SmokeTest - The following 1 profile is active: "test"
-2025-11-10 11:34:44 - com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-11-10 11:34:44 - com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
-2025-11-10 11:34:44 - com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-11-10 11:34:44 - org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:45 - com.hotel.SmokeTest - Starting SmokeTest using Java 21.0.8 with PID 58403 (started by saifudheen in /home/saifudheen/Projects/Hotel-Booking-System)
+2025-11-11 09:40:45 - com.hotel.SmokeTest - The following 1 profile is active: "test"
+2025-11-11 09:40:47 - com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-11-11 09:40:47 - com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-11-11 09:40:47 - com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-11-11 09:40:47 - org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     drop table if exists bookings cascade 
 Hibernate: 
     drop table if exists bookings cascade 
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     drop table if exists hotels cascade 
 Hibernate: 
     drop table if exists hotels cascade 
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     drop table if exists reviews cascade 
 Hibernate: 
     drop table if exists reviews cascade 
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     drop table if exists rooms cascade 
 Hibernate: 
     drop table if exists rooms cascade 
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     drop table if exists users cascade 
 Hibernate: 
     drop table if exists users cascade 
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     create table bookings (
         check_in_date date not null,
         check_out_date date not null,
@@ -134,7 +131,7 @@ Hibernate:
         status varchar(255),
         primary key (id)
     )
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     create table hotels (
         rating float(53),
         star_rating integer,
@@ -164,7 +161,7 @@ Hibernate:
         phone varchar(255),
         primary key (id)
     )
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     create table reviews (
         rating integer not null,
         booking_id bigint,
@@ -186,7 +183,7 @@ Hibernate:
         comment varchar(255),
         primary key (id)
     )
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     create table rooms (
         available boolean,
         capacity integer,
@@ -214,7 +211,7 @@ Hibernate:
         type varchar(255) not null,
         primary key (id)
     )
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     create table users (
         created_at timestamp(6),
         id bigint generated by default as identity,
@@ -242,7 +239,7 @@ Hibernate:
         username varchar(255) not null unique,
         primary key (id)
     )
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists bookings 
        add constraint FK7y09f5lun38jnooaw2hch0ke9 
        foreign key (hotel_id) 
@@ -252,7 +249,7 @@ Hibernate:
        add constraint FK7y09f5lun38jnooaw2hch0ke9 
        foreign key (hotel_id) 
        references hotels
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists bookings 
        add constraint FKrgoycol97o21kpjodw1qox4nc 
        foreign key (room_id) 
@@ -262,7 +259,7 @@ Hibernate:
        add constraint FKrgoycol97o21kpjodw1qox4nc 
        foreign key (room_id) 
        references rooms
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists bookings 
        add constraint FKeyog2oic85xg7hsu2je2lx3s6 
        foreign key (user_id) 
@@ -272,7 +269,7 @@ Hibernate:
        add constraint FKeyog2oic85xg7hsu2je2lx3s6 
        foreign key (user_id) 
        references users
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists reviews 
        add constraint FK28an517hrxtt2bsg93uefugrm 
        foreign key (booking_id) 
@@ -282,7 +279,7 @@ Hibernate:
        add constraint FK28an517hrxtt2bsg93uefugrm 
        foreign key (booking_id) 
        references bookings
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists reviews 
        add constraint FKb9igk5exfb4knqklcvka6cdhx 
        foreign key (hotel_id) 
@@ -292,7 +289,7 @@ Hibernate:
        add constraint FKb9igk5exfb4knqklcvka6cdhx 
        foreign key (hotel_id) 
        references hotels
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists reviews 
        add constraint FKcgy7qjc1r99dp117y9en6lxye 
        foreign key (user_id) 
@@ -302,7 +299,7 @@ Hibernate:
        add constraint FKcgy7qjc1r99dp117y9en6lxye 
        foreign key (user_id) 
        references users
-2025-11-10 11:34:45 - org.hibernate.SQL - 
+2025-11-11 09:40:48 - org.hibernate.SQL - 
     alter table if exists rooms 
        add constraint FKp5lufxy0ghq53ugm93hdc941k 
        foreign key (hotel_id) 
@@ -312,9 +309,9 @@ Hibernate:
        add constraint FKp5lufxy0ghq53ugm93hdc941k 
        foreign key (hotel_id) 
        references hotels
-2025-11-10 11:34:47 - com.hotel.SmokeTest - Started SmokeTest in 4.723 seconds (process running for 7.47)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - === DataInitializer started ===
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.SmokeTest - Started SmokeTest in 5.022 seconds (process running for 7.615)
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - === DataInitializer started ===
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -324,8 +321,8 @@ Hibernate:
         count(*) 
     from
         users u1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating sample users...
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating sample users...
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         users
@@ -339,7 +336,7 @@ Hibernate:
         (address, created_at, email, first_name, last_name, password, phone, updated_at, username, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         users
@@ -353,7 +350,7 @@ Hibernate:
         (address, created_at, email, first_name, last_name, password, phone, updated_at, username, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         users
@@ -367,7 +364,7 @@ Hibernate:
         (address, created_at, email, first_name, last_name, password, phone, updated_at, username, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -377,8 +374,8 @@ Hibernate:
         count(*) 
     from
         users u1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Created 3 users
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Created 3 users
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -388,8 +385,8 @@ Hibernate:
         count(*) 
     from
         hotels h1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating sample hotels...
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating sample hotels...
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -403,7 +400,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -417,7 +414,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -431,7 +428,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -445,7 +442,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -459,7 +456,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -473,7 +470,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -487,7 +484,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -501,7 +498,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -515,7 +512,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         hotels
@@ -529,7 +526,7 @@ Hibernate:
         (address, city, country, description, email, image_url, name, phone, rating, star_rating, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -539,8 +536,8 @@ Hibernate:
         count(*) 
     from
         hotels h1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Successfully created 10 hotels
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Successfully created 10 hotels
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -550,8 +547,8 @@ Hibernate:
         count(*) 
     from
         rooms r1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotels...
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotels...
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         h1_0.id,
         h1_0.address,
@@ -581,9 +578,9 @@ Hibernate:
         h1_0.star_rating 
     from
         hotels h1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Found 10 hotels to create rooms for
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Grand Marina Resort
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Found 10 hotels to create rooms for
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Grand Marina Resort
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -597,7 +594,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -611,7 +608,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -625,8 +622,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Metropolitan Suites
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Metropolitan Suites
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -640,7 +637,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -654,7 +651,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -668,8 +665,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Royal Plaza Hotel
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Royal Plaza Hotel
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -683,7 +680,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -697,7 +694,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -711,8 +708,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: The Urban Boutique
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: The Urban Boutique
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -726,7 +723,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -740,7 +737,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -754,8 +751,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Oasis Desert Resort
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Oasis Desert Resort
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -769,7 +766,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -783,7 +780,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -797,8 +794,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: The Grand Heritage
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: The Grand Heritage
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -812,7 +809,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -826,7 +823,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -840,8 +837,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Paradise Beach Resort
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Paradise Beach Resort
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -855,7 +852,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -869,7 +866,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -883,8 +880,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Tech Tower Hotel
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Tech Tower Hotel
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -898,7 +895,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -912,7 +909,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -926,8 +923,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Serenity Retreat
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Serenity Retreat
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -941,7 +938,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -955,7 +952,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -969,8 +966,8 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Creating rooms for hotel: Family Fun Resort
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Creating rooms for hotel: Family Fun Resort
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -984,7 +981,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -998,7 +995,7 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     insert 
     into
         rooms
@@ -1012,9 +1009,9 @@ Hibernate:
         (amenities, available, capacity, description, hotel_id, image_url, price, room_number, type, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, ?, ?, default)
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Successfully created rooms for all hotels
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - === DataInitializer completed ===
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Successfully created rooms for all hotels
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - === DataInitializer completed ===
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -1024,8 +1021,8 @@ Hibernate:
         count(*) 
     from
         users u1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Total users: 3
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Total users: 3
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -1035,8 +1032,8 @@ Hibernate:
         count(*) 
     from
         hotels h1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Total hotels: 10
-2025-11-10 11:34:47 - org.hibernate.SQL - 
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Total hotels: 10
+2025-11-11 09:40:50 - org.hibernate.SQL - 
     select
         count(*) 
     from
@@ -1046,9 +1043,9 @@ Hibernate:
         count(*) 
     from
         rooms r1_0
-2025-11-10 11:34:47 - com.hotel.config.DataInitializer - Total rooms: 30
+2025-11-11 09:40:50 - com.hotel.config.DataInitializer - Total rooms: 30
 ]]></system-out>
   </testcase>
-  <testcase name="applicationStarts" classname="com.hotel.SmokeTest" time="0.004"/>
-  <testcase name="contextLoads" classname="com.hotel.SmokeTest" time="0.004"/>
+  <testcase name="applicationStarts" classname="com.hotel.SmokeTest" time="0.005"/>
+  <testcase name="contextLoads" classname="com.hotel.SmokeTest" time="0.003"/>
 </testsuite>

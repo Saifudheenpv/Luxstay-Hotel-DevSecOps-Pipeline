@@ -48,3 +48,4 @@ graph TD
     F --> G[Trivy Image Vulnerability Scan]
     G --> H[Deploy to AWS EKS (Blue/Green)]
     H --> I[Email Notification (Success/Failure)]
+```

@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   tools {
-    jdk 'JDK17'
+    jdk 'JDK21'
     maven 'Maven3'
   }
 
@@ -134,22 +134,19 @@ pipeline {
             envsubst < k8s/app-deployment-green.yaml | kubectl apply -f - -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE}
 
-            # EXTRACT EXTERNAL-IP SILENTLY
-            EXTERNAL_IP=$(kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk '{print $4}')
-            if [[ "$EXTERNAL_IP" == *".elb.amazonaws.com"* ]]; then
-              echo "EXTERNAL_IP=$EXTERNAL_IP"
-            else
-              echo "EXTERNAL_IP=NOT-READY"
-            fi
+            echo "Service Status:"
+            kubectl get svc hotel-booking-service -n hotel-booking
           '''
+
           script {
             def ip = sh(
               script: '''
-                kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk '{print $4}'
+                kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk "{print \$4}"
               ''',
               returnStdout: true
             ).trim()
-            env.EXTERNAL_IP = ip.contains('elb.amazonaws.com') ? ip : 'NOT-READY'
+
+            env.EXTERNAL_IP = ip && ip.contains('elb.amazonaws.com') ? ip : 'NOT-READY'
           }
         }
       }

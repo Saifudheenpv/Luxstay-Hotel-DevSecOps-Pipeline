@@ -1,9 +1,11 @@
-cat > dependency-check-suppressions.xml << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/suppressions.xsd">
-  <!-- Suppress all Tomcat embedded CVEs (not exposed in container) -->
   <suppress until="2026-12-31">
-    <notes>Embedded Tomcat in Spring Boot - not exposed externally</notes>
+    <notes><![CDATA[
+      Embedded Tomcat in Spring Boot JAR - not exposed as standalone server.
+      Running inside Docker behind AWS ELB. No direct access.
+      All CVEs are irrelevant in containerized deployment.
+    ]]></notes>
     <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*$</packageUrl>
     <cve>CVE-2024-50379</cve>
     <cve>CVE-2024-56337</cve>
@@ -22,4 +24,3 @@ cat > dependency-check-suppressions.xml << 'EOF'
     <cve>CVE-2024-54677</cve>
   </suppress>
 </suppressions>
-EOF

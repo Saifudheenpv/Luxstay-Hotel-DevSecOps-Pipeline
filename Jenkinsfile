@@ -49,12 +49,7 @@ pipeline {
     stage('Auto-Migrate to Jakarta') {
       when { expression { params.AUTO_MIGRATE_JAKARTA } }
       steps {
-        sh '''
-          find src -name "*.java" -type f -print0 | xargs -0 sed -i \
-            -e 's/import javax\\.persistence\\./import jakarta.persistence./g' \
-            -e 's/import javax\\.validation\\./import jakarta.validation./g' \
-            -e 's/import javax\\.servlet\\./import jakarta.servlet./g'
-        '''
+        sh 'find src -name "*.java" -type f -print0 | xargs -0 sed -i "s/import javax\\.persistence\\./import jakarta.persistence./g"'
       }
     }
 
@@ -81,12 +76,7 @@ pipeline {
       steps {
         withSonarQubeEnv('Sonar-Server') {
           withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_AUTH_TOKEN')]) {
-            sh '''
-              mvn -B sonar:sonar \
-                -Dsonar.projectKey=hotel-booking-system \
-                -Dsonar.host.url=http://${SONARQUBE_URL}:9000 \
-                -Dsonar.login="$SONAR_AUTH_TOKEN"
-            '''
+            sh 'mvn -B sonar:sonar -Dsonar.projectKey=hotel-booking-system -Dsonar.host.url=http://${SONARQUBE_URL}:9000 -Dsonar.login="$SONAR_AUTH_TOKEN"'
           }
         }
       }
@@ -105,11 +95,9 @@ pipeline {
       }
     }
 
-    stage('Trivy Vulnerability Scan') {
+    stage('Trivy Scan') {
       steps {
-        sh '''
-          trivy image --exit-code 0 --no-progress --severity HIGH,CRITICAL ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
-        '''
+        sh 'trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}'
       }
     }
 
@@ -137,10 +125,7 @@ pipeline {
           '''
 
           script {
-            def ip = sh(
-              script: 'kubectl get svc hotel-booking-service -n hotel-booking --no-headers | awk "{print \$4}"',
-              returnStdout: true
-            ).trim()
+            def ip = sh(script: 'kubectl get svc hotel-booking-service -n hotel-booking --no-headers | awk "{print \$4}"', returnStdout: true).trim()
             env.EXTERNAL_IP = ip.contains('elb.amazonaws.com') ? ip : 'PENDING'
           }
         }
@@ -172,25 +157,21 @@ pipeline {
       echo "SUCCESS: Deployed v${APP_VERSION}!"
       emailext(
         to: 'mesaifudheenpv@gmail.com',
-        subject: "LIVE: Luxstay Hotel Booking v${APP_VERSION}",
+        subject: "LIVE: Luxstay Hotel v${APP_VERSION}",
         body: """
-        <h2>Your Luxury Hotel App is LIVE!</h2>
+        <h2>Your App is LIVE!</h2>
         <b>Version:</b> v${APP_VERSION}<br>
-        <b>Strategy:</b> ${params.DEPLOYMENT_STRATEGY}<br>
-        <b>Cluster:</b> ${CLUSTER_NAME}<br>
-        <b>Namespace:</b> ${K8S_NAMESPACE}<br>
-        <b>External URL:</b> <a href="http://${env.EXTERNAL_IP}">http://${env.EXTERNAL_IP}</a><br><br>
-        Jenkins Build: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
+        <b>URL:</b> <a href="http://${env.EXTERNAL_IP}">http://${env.EXTERNAL_IP}</a><br><br>
+        Jenkins: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a>
         """,
         mimeType: 'text/html'
       )
     }
     failure {
-      echo "FAILED: Check logs."
       emailext(
         to: 'mesaifudheenpv@gmail.com',
         subject: "FAILED: Hotel Booking v${APP_VERSION}",
-        body: "Build Failed!<br>Check: <a href='${env.BUILD_URL}console'>Console Log</a>",
+        body: "Build Failed!<br>Check: <a href='${env.BUILD_URL}console'>Console</a>",
         mimeType: 'text/html'
       )
     }

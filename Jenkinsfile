@@ -106,6 +106,14 @@ pipeline {
       }
     }
 
+    stage('Trivy Vulnerability Scan') {
+      steps {
+        sh '''
+          trivy image --exit-code 0 --no-progress --severity HIGH,CRITICAL ${DOCKER_NAMESPACE}/${APP_NAME}:${APP_VERSION}
+        '''
+      }
+    }
+
     stage('Deploy to EKS') {
       steps {
         withCredentials([
@@ -126,16 +134,21 @@ pipeline {
             envsubst < k8s/app-deployment-green.yaml | kubectl apply -f - -n ${K8S_NAMESPACE}
             kubectl apply -f k8s/app-service.yaml -n ${K8S_NAMESPACE}
 
-            echo "Service Status:"
-            kubectl get svc hotel-booking-service -n hotel-booking
+            # EXTRACT EXTERNAL-IP SILENTLY
+            EXTERNAL_IP=$(kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk '{print $4}')
+            if [[ "$EXTERNAL_IP" == *".elb.amazonaws.com"* ]]; then
+              echo "EXTERNAL_IP=$EXTERNAL_IP"
+            else
+              echo "EXTERNAL_IP=NOT-READY"
+            fi
           '''
-
           script {
             def ip = sh(
-              script: "kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk '{print \$4}'",
+              script: '''
+                kubectl get svc hotel-booking-service -n hotel-booking --no-headers 2>/dev/null | awk '{print $4}'
+              ''',
               returnStdout: true
             ).trim()
-
             env.EXTERNAL_IP = ip.contains('elb.amazonaws.com') ? ip : 'NOT-READY'
           }
         }

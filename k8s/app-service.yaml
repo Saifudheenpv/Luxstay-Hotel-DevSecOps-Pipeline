@@ -3,12 +3,13 @@ kind: Service
 metadata:
   name: hotel-booking-service
   namespace: hotel-booking
-  labels:
-    app: hotel-booking
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "elb"  # ← CHANGE TO "elb"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # Change to "alb"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-certificate-arn: "arn:aws:acm:ap-south-1:724663512594:certificate/YOUR-ACM-ARN"  # From Step 1
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "HTTP"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-redirect: "443"
 spec:
   type: LoadBalancer
   selector:
@@ -16,6 +17,10 @@ spec:
     version: blue
   ports:
     - name: http
-      protocol: TCP
       port: 80
       targetPort: 8080
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 8080
+      protocol: TCP

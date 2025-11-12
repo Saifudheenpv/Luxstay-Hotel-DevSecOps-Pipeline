@@ -5,24 +5,9 @@ It integrates **SonarQube**, **OWASP Dependency Check**, **Trivy**, **Docker**, 
 
 ---
 
-## 🚀 **Pipeline Overview (GitHub Compatible)**
+## 🚀 **Pipeline Overview**
 
-```mermaid
-flowchart TD
-  A[Developer Push Code to GitHub] --> B[Jenkins Trigger]
-  B --> C[Build and Test with Maven]
-  C --> D[Run OWASP Security Scan]
-  D --> E[SonarQube Code Quality Check]
-  E --> F[Build and Push Docker Image]
-  F --> G[Scan Docker Image with Trivy]
-  G --> H[Deploy Application to AWS EKS]
-  H --> I{Deployment Strategy}
-  I -->|Blue-Green| J[Switch Traffic to Green Environment]
-  I -->|Rolling| K[Perform Rolling Update]
-  J --> L[Send Success Notification]
-  K --> L
-  B --> M[Send Failure Notification]
-```
+![CI/CD Pipeline Flow](assets/Jenkins-CI-CD-Pipeline.drawio.png)
 
 ---
 
@@ -210,11 +195,22 @@ kubectl patch service hotel-booking-service -p '{"spec":{"selector":{"version":"
 
 ---
 
-## 📸 **Sample Dashboard Screenshot**
-> Add your Jenkins pipeline dashboard image here
-```
-![Jenkins Pipeline Dashboard](docs/images/jenkins-pipeline-dashboard.png)
-```
+## Website Screenshots
+
+### Home Page
+![Home Page](assets/home.png)
+
+### Register User
+![Register User](assets/register.png)
+
+### Login User
+![Login User](assets/login.png)
+
+### Profile Page
+![Profile](assets/user.png)
+
+### Browse Hotels
+![Browse Books](assets/hotels.png)
 
 ---
 
@@ -238,7 +234,7 @@ After a successful build:
 ## 👨‍💻 **Author**
 
 **Saifudheen PV**  
-🌍 DevOps & Cloud Engineer | Builder of CashFix & Luxstay Projects  
+🌍 DevOps & Cloud Engineer 
 📧 [mesaifudheenpv@gmail.com](mailto:mesaifudheenpv@gmail.com)
 
 ---
